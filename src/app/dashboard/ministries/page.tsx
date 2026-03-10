@@ -99,6 +99,9 @@ export default async function MinistriesDashboard() {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
+                                        <Link href={`/dashboard/ministries/${ministry.id}`} className="text-blue-600 hover:text-blue-900 font-medium text-sm">
+                                            Miembros
+                                        </Link>
                                         <DeleteButton id={ministry.id} />
                                     </div>
                                 </div>
@@ -116,7 +119,10 @@ export default async function MinistriesDashboard() {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-3">
+                                                    <Link href={`/dashboard/ministries/${dept.id}`} className="text-blue-600 hover:text-blue-900 font-medium">
+                                                        Abrir
+                                                    </Link>
                                                     <DeleteButton id={dept.id} />
                                                 </div>
                                             </div>
