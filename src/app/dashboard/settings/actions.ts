@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 
-export async function createChurch(formData: FormData) {
+export async function createChurch(prevState: any, formData: FormData) {
     const supabase = await createClient()
 
     // 1. Verificamos la sesión en Supabase
@@ -33,7 +33,8 @@ export async function createChurch(formData: FormData) {
                 create: {
                     id: user.id, // Usamos el ID de Supabase para tener paridad 1:1
                     email: user.email!, // Forzamos ! porque sabemos que Supabase tiene el email
-                    fullName: 'Administrador Inicial',
+                    name: 'Administrador Inicial',
+                    password_hash: '', // Clave manejada por Supabase
                 },
             })
 
@@ -50,7 +51,7 @@ export async function createChurch(formData: FormData) {
             await tx.userChurch.create({
                 data: {
                     userId: user.id,
-                    churchId: newChurch.id,
+                    church_id: newChurch.id,
                     role: 'ADMIN', // Rol maestro definido en el schema Prisma
                 },
             })
