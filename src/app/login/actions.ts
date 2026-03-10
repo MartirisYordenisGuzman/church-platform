@@ -17,6 +17,7 @@ export async function login(formData: FormData) {
     const { error } = await supabase.auth.signInWithPassword(data)
 
     if (error) {
+        console.error('Error en Login de Supabase:', error.message)
         // Redirige o manda error dependiendo de de tu manejo
         redirect('/login?message=No+se+pudo+iniciar+sesión')
     }
@@ -37,6 +38,7 @@ export async function signup(formData: FormData) {
     const { error } = await supabase.auth.signUp(data)
 
     if (error) {
+        console.error('Error en Signup de Supabase:', error.message)
         redirect('/login?message=No+se+pudo+crear+la+cuenta')
     }
 
