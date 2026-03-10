@@ -1,9 +1,9 @@
 'use client'
 
 import { useActionState, useEffect, useState } from 'react'
-import { addMemberToMinistry } from './actions'
+import { addMemberToMinistry } from '../actions'
 
-const initialState = { error: '', success: false }
+const initialState: any = { error: '' }
 
 export function AddMemberForm({ ministryId }: { ministryId: string }) {
     const [state, formAction, isPending] = useActionState(addMemberToMinistry, initialState)
