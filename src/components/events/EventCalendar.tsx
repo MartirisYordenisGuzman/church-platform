@@ -17,7 +17,7 @@ type CalendarEvent = {
 }
 
 export default function EventCalendar({ initialEvents }: { initialEvents: CalendarEvent[] }) {
-    const [viewMode, setViewMode] = useState<'month' | 'week'>('month')
+    const [viewMode, setViewMode] = useState<'month' | 'week'>('week')
     const [currentDate, setCurrentDate] = useState(new Date())
 
     const nextPeriod = () => {
@@ -106,18 +106,60 @@ export default function EventCalendar({ initialEvents }: { initialEvents: Calend
 
                 <div className="flex bg-slate-100 p-1 rounded-lg">
                     <button
-                        onClick={() => setViewMode('month')}
-                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'month' ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
-                    >
-                        Mes
-                    </button>
-                    <button
                         onClick={() => setViewMode('week')}
                         className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'week' ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
                     >
                         Semana
                     </button>
+                    <button
+                        onClick={() => setViewMode('month')}
+                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'month' ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                        Mes
+                    </button>
                 </div>
+            </div>
+
+            {/* Nueva sección: Tarjetas de Eventos (Ahora arriba) */}
+            <div className="p-6 bg-slate-50 border-b border-slate-200">
+                <h3 className="text-xl font-bold text-slate-800 mb-6">
+                    Eventos de {viewMode === 'month' ? 'este mes' : 'esta semana'}
+                </h3>
+
+                {visibleEvents.length === 0 ? (
+                    <div className="text-center py-8 text-slate-500">
+                        No hay eventos programados para este período.
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {visibleEvents.map((event, idx) => (
+                            <div key={`${event.id}-${idx}`} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+                                <div className="h-3 bg-blue-600 w-full"></div>
+                                <div className="p-6">
+                                    <div className="text-sm font-semibold text-blue-600 mb-2 capitalize">
+                                        {format(event.instanceDate, "EEEE d 'de' MMMM", { locale: es })}
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-900 mb-2">{event.title}</h3>
+                                    {event.description && (
+                                        <p className="text-slate-600 text-sm mb-4 line-clamp-3">
+                                            {event.description}
+                                        </p>
+                                    )}
+                                    <div className="space-y-2 mt-4 text-sm text-slate-500">
+                                        <div className="flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                            {format(event.instanceDate, 'HH:mm')} hrs
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                            {event.location || 'Por definir'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <div className="p-6">
@@ -159,48 +201,6 @@ export default function EventCalendar({ initialEvents }: { initialEvents: Calend
                         )
                     })}
                 </div>
-            </div>
-
-            {/* Nueva sección: Tarjetas de Eventos */}
-            <div className="p-6 bg-slate-50 border-t border-slate-200">
-                <h3 className="text-xl font-bold text-slate-800 mb-6">
-                    Eventos de {viewMode === 'month' ? 'este mes' : 'esta semana'}
-                </h3>
-
-                {visibleEvents.length === 0 ? (
-                    <div className="text-center py-8 text-slate-500">
-                        No hay eventos programados para este período.
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {visibleEvents.map((event, idx) => (
-                            <div key={`${event.id}-${idx}`} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
-                                <div className="h-3 bg-blue-600 w-full"></div>
-                                <div className="p-6">
-                                    <div className="text-sm font-semibold text-blue-600 mb-2 capitalize">
-                                        {format(event.instanceDate, "EEEE d 'de' MMMM", { locale: es })}
-                                    </div>
-                                    <h3 className="text-xl font-bold text-slate-900 mb-2">{event.title}</h3>
-                                    {event.description && (
-                                        <p className="text-slate-600 text-sm mb-4 line-clamp-3">
-                                            {event.description}
-                                        </p>
-                                    )}
-                                    <div className="space-y-2 mt-4 text-sm text-slate-500">
-                                        <div className="flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                            {format(event.instanceDate, 'HH:mm')} hrs
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                                            {event.location || 'Por definir'}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
             </div>
         </div>
     )
