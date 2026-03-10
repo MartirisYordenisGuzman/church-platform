@@ -37,7 +37,7 @@ export default async function DirectoryDashboard() {
     // Obtenemos todos los miembros
     const members = await prisma.member.findMany({
         where: { church_id: userChurch.church_id },
-        orderBy: [{ last_name: 'asc' }, { first_name: 'asc' }]
+        orderBy: [{ name: 'asc' }]
     })
 
     return (
@@ -76,10 +76,10 @@ export default async function DirectoryDashboard() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {members.map((member) => (
+                                {members.map((member: any) => (
                                     <tr key={member.id} className="hover:bg-slate-50/50 transition-colors">
                                         <td className="px-6 py-4">
-                                            <div className="font-semibold text-slate-900">{member.first_name} {member.last_name}</div>
+                                            <div className="font-semibold text-slate-900">{member.name}</div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1">
