@@ -140,6 +140,7 @@ model Member {
   last_name  String
   email      String?
   phone      String?
+  birth_date DateTime?
   created_at DateTime @default(now())
 
   church     Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
