@@ -43,6 +43,7 @@ export async function createEvent(prevState: any, formData: FormData) {
     const recurrenceEndDateStr = formData.get('recurrence_end_date') as string
     const visibility = formData.get('visibility') as EventVisibility || 'PUBLIC'
     const ministryId = formData.get('ministry_id') as string
+    const imageUrl = formData.get('image_url') as string
 
     if (!title || !startDateStr || !endDateStr) {
         return { error: 'Título, Fecha de Inicio y Fecha de Fin son obligatorios.' }
@@ -61,6 +62,7 @@ export async function createEvent(prevState: any, formData: FormData) {
                 recurrence_end_date: recurrenceEndDateStr ? new Date(recurrenceEndDateStr) : null,
                 visibility,
                 ministry_id: ministryId || null,
+                image_url: imageUrl || null,
             },
         })
     } catch (error: any) {

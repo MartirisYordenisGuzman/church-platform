@@ -36,6 +36,7 @@ export default async function EventsDashboard() {
     // Obtenemos los eventos de la base de datos (ordenados por fecha de inicio)
     const events = await prisma.event.findMany({
         where: { church_id: userChurch.church_id },
+        include: { ministry: true },
         orderBy: { start_date: 'asc' }
     })
 
@@ -91,6 +92,11 @@ export default async function EventsDashboard() {
                                                     {event.recurrence === 'DAILY' ? 'Diario' :
                                                         event.recurrence === 'WEEKLY' ? 'Semanal' :
                                                             event.recurrence === 'MONTHLY' ? 'Mensual' : 'Anual'}
+                                                </span>
+                                            )}
+                                            {event.ministry && (
+                                                <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium ml-1">
+                                                    {event.ministry.name}
                                                 </span>
                                             )}
                                         </div>

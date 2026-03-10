@@ -9,6 +9,7 @@ export const eventService = {
         try {
             const events = await prisma.event.findMany({
                 where: { church_id: churchId },
+                include: { ministry: true },
                 orderBy: { start_date: "asc" },
             })
             return events
@@ -28,6 +29,7 @@ export const eventService = {
                     church_id: churchId,
                     visibility: 'PUBLIC'
                 },
+                include: { ministry: true },
                 orderBy: { start_date: "asc" },
             })
             return events

@@ -79,6 +79,7 @@ model Event {
   church_id           String
   title               String
   description         String?
+  image_url           String?
   location            String?
   start_date          DateTime
   end_date            DateTime

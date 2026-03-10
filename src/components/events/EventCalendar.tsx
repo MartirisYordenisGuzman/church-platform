@@ -14,6 +14,8 @@ type CalendarEvent = {
     location: string | null
     recurrence: string
     recurrence_end_date: Date | null
+    image_url?: string | null
+    ministry?: { id: string, name: string } | null
 }
 
 export default function EventCalendar({ initialEvents }: { initialEvents: CalendarEvent[] }) {
@@ -133,13 +135,39 @@ export default function EventCalendar({ initialEvents }: { initialEvents: Calend
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {visibleEvents.map((event, idx) => (
-                            <div key={`${event.id}-${idx}`} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
-                                <div className="h-3 bg-blue-600 w-full"></div>
-                                <div className="p-6">
-                                    <div className="text-sm font-semibold text-blue-600 mb-2 capitalize">
-                                        {format(event.instanceDate, "EEEE d 'de' MMMM", { locale: es })}
+                            <div key={`${event.id}-${idx}`} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
+                                {event.image_url ? (
+                                    <div className="h-48 w-full relative">
+                                        <img
+                                            src={event.image_url}
+                                            alt={event.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                        <div className="absolute bottom-4 left-4 text-white">
+                                            <div className="text-sm font-semibold capitalize drop-shadow-md">
+                                                {format(event.instanceDate, "EEEE d 'de' MMMM", { locale: es })}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <h3 className="text-xl font-bold text-slate-900 mb-2">{event.title}</h3>
+                                ) : (
+                                    <div className="h-3 bg-blue-600 w-full"></div>
+                                )}
+
+                                <div className="p-6 flex flex-col flex-grow">
+                                    {!event.image_url && (
+                                        <div className="text-sm font-semibold text-blue-600 mb-2 capitalize">
+                                            {format(event.instanceDate, "EEEE d 'de' MMMM", { locale: es })}
+                                        </div>
+                                    )}
+                                    <div className="flex items-start gap-2 justify-between mb-2">
+                                        <h3 className="text-xl font-bold text-slate-900 leading-tight">{event.title}</h3>
+                                        {event.ministry && (
+                                            <span className="text-xs font-semibold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full whitespace-nowrap">
+                                                {event.ministry.name}
+                                            </span>
+                                        )}
+                                    </div>
                                     {event.description && (
                                         <p className="text-slate-600 text-sm mb-4 line-clamp-3">
                                             {event.description}

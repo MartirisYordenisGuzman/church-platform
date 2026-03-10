@@ -1,13 +1,28 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { createEvent } from '../actions'
 import Link from 'next/link'
+
+// Cargar ministerios para llenar el selector
+function useMinistries() {
+    const [ministries, setMinistries] = useState<{ id: string, name: string }[]>([])
+
+    useEffect(() => {
+        fetch('/api/ministries')
+            .then(res => res.json())
+            .then(data => setMinistries(data))
+            .catch(err => console.error("Error fetching ministries:", err))
+    }, [])
+
+    return ministries
+}
 
 const initialState = { error: '' }
 
 export default function NewEventPage() {
     const [state, formAction, isPending] = useActionState(createEvent, initialState)
+    const ministries = useMinistries()
 
     return (
         <div className="max-w-2xl mx-auto">
@@ -35,6 +50,19 @@ export default function NewEventPage() {
                             placeholder="Ej: Servicio de Acción de Gracias"
                             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
                             required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="image_url">
+                            Imagen Destacada (URL Opcional)
+                        </label>
+                        <input
+                            id="image_url"
+                            name="image_url"
+                            type="url"
+                            placeholder="https://ejemplo.com/foto.jpg"
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
                         />
                     </div>
 
@@ -123,6 +151,23 @@ export default function NewEventPage() {
                             <option value="PRIVATE">Privado (Solo miembros con sesión iniciada)</option>
                             <option value="MINISTRY">Solo Ministerio (Solo para un grupo específico)</option>
                         </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="ministry_id">
+                            Asignar a un Ministerio (Opcional)
+                        </label>
+                        <select
+                            id="ministry_id"
+                            name="ministry_id"
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
+                        >
+                            <option value="">Ninguno (Evento General)</option>
+                            {ministries.map(min => (
+                                <option key={min.id} value={min.id}>{min.name}</option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-slate-500 mt-1">Si este evento es solo para un grupo en específico, selecciónalo aquí para que aparezca en su página.</p>
                     </div>
 
                     <div>
