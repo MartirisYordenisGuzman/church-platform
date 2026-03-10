@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- CORE ---
+
+model Church {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique // Ej: mi-iglesia (para el portal publico)
+  domain      String?  @unique // Ej: www.miiglesia.com (dominio personalizado futuro)
+  description String?
+  logo        String?
+  created_at  DateTime @default(now())
+  
+  // Relaciones
+  members     UserChurch[]
+  events      Event[]
+  sermons     Sermon[]
+  ministries  Ministry[]
+  songs       Song[]
+}
+
+model User {
+  id            String   @id @default(uuid()) // Creado localmente o vía NextAuth
+  name          String
+  email         String   @unique
+  password_hash String   // Para login por credenciales en NextAuth
+  created_at    DateTime @default(now())
+
+  // Un usuario puede pertenecer a múltiples iglesias
+  churches      UserChurch[]
+}
+
+// Tabla pivote con roles (Manejo de Permisos multi-tenant)
+model UserChurch {
+  id        String @id @default(uuid())
+  userId    String
+  church_id String
+  role      Role   @default(MEMBER) // ADMIN, LEADER, MEMBER
+
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  church    Church @relation(fields: [church_id], references: [id], onDelete: Cascade)
+
+  @@unique([userId, church_id]) // Un usuario solo tiene un registro por iglesia
+}
+
+enum Role {
+  ADMIN
+  LEADER
+  MEMBER
+}
+
+// --- GESTIÓN DE CONTENIDO ---
+
+model Event {
+  id          String   @id @default(uuid())
+  church_id   String
+  title       String
+  description String?
+  location    String?
+  start_date  DateTime
+  end_date    DateTime
+  created_at  DateTime @default(now())
+  
+  church      Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+}
+
+model Sermon {
+  id               String   @id @default(uuid())
+  church_id        String
+  title            String
+  preacher         String
+  youtube_video_id String
+  date             DateTime
+  series           String?
+  created_at       DateTime @default(now())
+  
+  church           Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+}
+
+model Ministry {
+  id          String   @id @default(uuid())
+  church_id   String
+  name        String
+  description String?
+  leader_name String?
+  created_at  DateTime @default(now())
+  
+  church      Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+}
+
+model Song {
+  id          String   @id @default(uuid())
+  church_id   String
+  title       String
+  lyrics      String?  @db.Text
+  youtube_url String?
+  created_at  DateTime @default(now())
+  
+  church      Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+}
