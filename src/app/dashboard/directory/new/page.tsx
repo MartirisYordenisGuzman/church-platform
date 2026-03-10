@@ -24,14 +24,27 @@ export default function NewMemberPage() {
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
                 <form action={formAction} className="flex flex-col gap-6">
 
-                    <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="name">
-                                Nombre Completo <span className="text-red-500">*</span>
+                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="first_name">
+                                Nombres <span className="text-red-500">*</span>
                             </label>
                             <input
-                                id="name"
-                                name="name"
+                                id="first_name"
+                                name="first_name"
+                                type="text"
+                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="last_name">
+                                Apellidos <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                id="last_name"
+                                name="last_name"
                                 type="text"
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
                                 required

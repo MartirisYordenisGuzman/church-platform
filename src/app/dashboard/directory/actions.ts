@@ -25,20 +25,22 @@ async function getCurrentUserChurch() {
 export async function createMember(prevState: any, formData: FormData) {
     const userChurch = await getCurrentUserChurch()
 
-    const name = formData.get('name') as string
+    const first_name = formData.get('first_name') as string
+    const last_name = formData.get('last_name') as string
     const email = formData.get('email') as string
     const phone = formData.get('phone') as string
     const birth_date = formData.get('birth_date') as string
 
-    if (!name) {
-        return { error: 'El nombre es obligatorio.' }
+    if (!first_name || !last_name) {
+        return { error: 'Nombre y apellido son obligatorios.' }
     }
 
     try {
         await prisma.member.create({
             data: {
                 church_id: userChurch.church_id,
-                name,
+                first_name,
+                last_name,
                 email: email || null,
                 phone: phone || null,
                 birth_date: birth_date ? new Date(birth_date) : null,
@@ -57,20 +59,22 @@ export async function updateMember(prevState: any, formData: FormData) {
     const userChurch = await getCurrentUserChurch()
 
     const id = formData.get('id') as string
-    const name = formData.get('name') as string
+    const first_name = formData.get('first_name') as string
+    const last_name = formData.get('last_name') as string
     const email = formData.get('email') as string
     const phone = formData.get('phone') as string
     const birth_date = formData.get('birth_date') as string
 
-    if (!id || !name) {
-        return { error: 'El nombre es obligatorio.' }
+    if (!id || !first_name || !last_name) {
+        return { error: 'Nombre y apellido son obligatorios.' }
     }
 
     try {
         await prisma.member.update({
             where: { id, church_id: userChurch.church_id },
             data: {
-                name,
+                first_name,
+                last_name,
                 email: email || null,
                 phone: phone || null,
                 birth_date: birth_date ? new Date(birth_date) : null,
