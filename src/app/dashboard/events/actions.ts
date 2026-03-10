@@ -94,3 +94,50 @@ export async function deleteEvent(eventId: string) {
     revalidatePath('/dashboard/events')
     revalidatePath(`/${userChurch.church.slug}/events`)
 }
+
+export async function updateEvent(eventId: string, prevState: any, formData: FormData) {
+    const userChurch = await getCurrentUserChurch()
+
+    const title = formData.get('title') as string
+    const description = formData.get('description') as string
+    const location = formData.get('location') as string
+    const startDateStr = formData.get('start_date') as string
+    const endDateStr = formData.get('end_date') as string
+    const recurrence = formData.get('recurrence') as EventRecurrence || 'NONE'
+    const recurrenceEndDateStr = formData.get('recurrence_end_date') as string
+    const visibility = formData.get('visibility') as EventVisibility || 'PUBLIC'
+    const ministryId = formData.get('ministry_id') as string
+    const imageUrl = formData.get('image_url') as string
+
+    if (!title || !startDateStr || !endDateStr) {
+        return { error: 'Título, Fecha de Inicio y Fecha de Fin son obligatorios.' }
+    }
+
+    try {
+        await prisma.event.update({
+            where: {
+                id: eventId,
+                church_id: userChurch.church_id // Validar que pertenece a la iglesia del usuario
+            },
+            data: {
+                title,
+                description,
+                location,
+                start_date: new Date(startDateStr),
+                end_date: new Date(endDateStr),
+                recurrence,
+                recurrence_end_date: recurrenceEndDateStr ? new Date(recurrenceEndDateStr) : null,
+                visibility,
+                ministry_id: ministryId || null,
+                image_url: imageUrl || null,
+            },
+        })
+    } catch (error: any) {
+        console.error('Error actualizando evento:', error)
+        return { error: 'Ocurrió un error inesperado al actualizar el evento.' }
+    }
+
+    revalidatePath('/dashboard/events')
+    revalidatePath(`/${userChurch.church.slug}/events`)
+    redirect('/dashboard/events')
+}

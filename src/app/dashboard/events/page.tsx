@@ -111,6 +111,9 @@ export default async function EventsDashboard() {
                                         {event.location || <span className="text-slate-400 italic">No especificada</span>}
                                     </td>
                                     <td className="px-6 py-4 text-right flex justify-end gap-3">
+                                        <Link href={`/dashboard/events/${event.id}/edit`} className="text-blue-600 hover:text-blue-900 font-medium">
+                                            Editar
+                                        </Link>
                                         <DeleteButton id={event.id} />
                                     </td>
                                 </tr>
