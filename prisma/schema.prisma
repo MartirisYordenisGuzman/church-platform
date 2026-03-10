@@ -20,11 +20,26 @@ model Church {
   created_at  DateTime @default(now())
   
   // Relaciones
-  members     UserChurch[]
+  members     UserChurch[] // Usuarios administrativos
   events      Event[]
   sermons     Sermon[]
   ministries  Ministry[]
   songs       Song[]
+  directory   Member[] // Miembros regulares
+}
+
+enum EventRecurrence {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum EventVisibility {
+  PUBLIC
+  PRIVATE
+  MINISTRY
 }
 
 model User {
@@ -60,16 +75,26 @@ enum Role {
 // --- GESTIÓN DE CONTENIDO ---
 
 model Event {
-  id          String   @id @default(uuid())
-  church_id   String
-  title       String
-  description String?
-  location    String?
-  start_date  DateTime
-  end_date    DateTime
-  created_at  DateTime @default(now())
+  id                  String   @id @default(uuid())
+  church_id           String
+  title               String
+  description         String?
+  location            String?
+  start_date          DateTime
+  end_date            DateTime
   
-  church      Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+  // Recurrencia
+  recurrence          EventRecurrence @default(NONE)
+  recurrence_end_date DateTime?
+  
+  // Visibilidad y Segmentación
+  visibility          EventVisibility @default(PUBLIC)
+  ministry_id         String?
+
+  created_at          DateTime @default(now())
+  
+  church              Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+  ministry            Ministry? @relation(fields: [ministry_id], references: [id], onDelete: SetNull)
 }
 
 model Sermon {
@@ -86,14 +111,51 @@ model Sermon {
 }
 
 model Ministry {
-  id          String   @id @default(uuid())
-  church_id   String
-  name        String
-  description String?
-  leader_name String?
-  created_at  DateTime @default(now())
+  id            String   @id @default(uuid())
+  church_id     String
+  name          String
+  description   String?
+  leader_name   String?
+  coleader_name String?
+  parent_id     String?  // Si tiene un padre, esto es un sub-departamento
+  created_at    DateTime @default(now())
   
-  church      Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+  church        Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+
+  // Autorelación para departamentos
+  parent        Ministry?  @relation("MinistryHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
+  departments   Ministry[] @relation("MinistryHierarchy")
+
+  // Eventos exclusivos de este ministerio
+  events        Event[]
+
+  // Integrantes del ministerio
+  members       MinistryMember[]
+}
+
+model Member {
+  id         String   @id @default(uuid())
+  church_id  String
+  name       String
+  email      String?
+  phone      String?
+  created_at DateTime @default(now())
+
+  church     Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+  ministries MinistryMember[]
+}
+
+model MinistryMember {
+  id          String   @id @default(uuid())
+  ministry_id String
+  member_id   String
+  role        String   @default("MEMBER") // Puede ser LEADER, COLEADER, MEMBER
+  joined_at   DateTime @default(now())
+
+  ministry    Ministry @relation(fields: [ministry_id], references: [id], onDelete: Cascade)
+  member      Member   @relation(fields: [member_id], references: [id], onDelete: Cascade)
+
+  @@unique([ministry_id, member_id])
 }
 
 model Song {

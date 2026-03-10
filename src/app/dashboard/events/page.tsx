@@ -77,7 +77,23 @@ export default async function EventsDashboard() {
                             {events.map((event) => (
                                 <tr key={event.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                     <td className="px-6 py-4">
-                                        <div className="font-semibold text-slate-900">{event.title}</div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <div className="font-semibold text-slate-900">{event.title}</div>
+                                            {event.visibility === 'PRIVATE' && (
+                                                <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Privado</span>
+                                            )}
+                                            {event.visibility === 'MINISTRY' && (
+                                                <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">Solo Ministerio</span>
+                                            )}
+                                            {event.recurrence !== 'NONE' && (
+                                                <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                                                    {event.recurrence === 'DAILY' ? 'Diario' :
+                                                        event.recurrence === 'WEEKLY' ? 'Semanal' :
+                                                            event.recurrence === 'MONTHLY' ? 'Mensual' : 'Anual'}
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="text-xs text-slate-500 truncate max-w-xs">{event.description}</div>
                                     </td>
                                     <td className="px-6 py-4">

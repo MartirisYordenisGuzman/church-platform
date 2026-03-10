@@ -79,6 +79,52 @@ export default function NewEventPage() {
                         />
                     </div>
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="recurrence">
+                                Repetición del Evento
+                            </label>
+                            <select
+                                id="recurrence"
+                                name="recurrence"
+                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
+                            >
+                                <option value="NONE">No se repite (Un solo día)</option>
+                                <option value="DAILY">Diariamente</option>
+                                <option value="WEEKLY">Semanalmente</option>
+                                <option value="MONTHLY">Mensualmente</option>
+                                <option value="YEARLY">Anualmente</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="recurrence_end_date">
+                                Repetir hasta (Opcional)
+                            </label>
+                            <input
+                                id="recurrence_end_date"
+                                name="recurrence_end_date"
+                                type="date"
+                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="visibility">
+                            Visibilidad (Quién puede ver esto)
+                        </label>
+                        <select
+                            id="visibility"
+                            name="visibility"
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
+                        >
+                            <option value="PUBLIC">Público (Visible en el portal web de la iglesia)</option>
+                            <option value="PRIVATE">Privado (Solo miembros con sesión iniciada)</option>
+                            <option value="MINISTRY">Solo Ministerio (Solo para un grupo específico)</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="description">
                             Descripción Corta

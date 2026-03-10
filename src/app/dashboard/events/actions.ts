@@ -27,6 +27,8 @@ async function getCurrentUserChurch() {
     return userChurch
 }
 
+import { EventRecurrence, EventVisibility } from '@prisma/client'
+
 export async function createEvent(prevState: any, formData: FormData) {
     const userChurch = await getCurrentUserChurch()
 
@@ -35,6 +37,12 @@ export async function createEvent(prevState: any, formData: FormData) {
     const location = formData.get('location') as string
     const startDateStr = formData.get('start_date') as string
     const endDateStr = formData.get('end_date') as string
+
+    // Novedades: Recurrencia y Visibilidad
+    const recurrence = formData.get('recurrence') as EventRecurrence || 'NONE'
+    const recurrenceEndDateStr = formData.get('recurrence_end_date') as string
+    const visibility = formData.get('visibility') as EventVisibility || 'PUBLIC'
+    const ministryId = formData.get('ministry_id') as string
 
     if (!title || !startDateStr || !endDateStr) {
         return { error: 'Título, Fecha de Inicio y Fecha de Fin son obligatorios.' }
@@ -49,6 +57,10 @@ export async function createEvent(prevState: any, formData: FormData) {
                 location,
                 start_date: new Date(startDateStr),
                 end_date: new Date(endDateStr),
+                recurrence,
+                recurrence_end_date: recurrenceEndDateStr ? new Date(recurrenceEndDateStr) : null,
+                visibility,
+                ministry_id: ministryId || null,
             },
         })
     } catch (error: any) {

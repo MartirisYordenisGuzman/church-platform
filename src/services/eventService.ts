@@ -17,4 +17,23 @@ export const eventService = {
             return []
         }
     },
+
+    /**
+     * Obtiene solo los eventos públicos para mostrar en el portal de la iglesia
+     */
+    async getPublicEventsByChurchId(churchId: string): Promise<Event[]> {
+        try {
+            const events = await prisma.event.findMany({
+                where: {
+                    church_id: churchId,
+                    visibility: 'PUBLIC'
+                },
+                orderBy: { start_date: "asc" },
+            })
+            return events
+        } catch (error) {
+            console.error(`Error fetching events for church (${churchId}):`, error)
+            return []
+        }
+    },
 }
