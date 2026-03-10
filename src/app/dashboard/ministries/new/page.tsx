@@ -25,12 +25,33 @@ function useMinistries() {
     return ministries
 }
 
+// Cargar miembros del directorio para autocompletado nativo
+function useMembers() {
+    const [members, setMembers] = useState<{ id: string, first_name: string, last_name: string }[]>([])
+
+    useEffect(() => {
+        fetch('/api/directory')
+            .then(res => res.json())
+            .then(data => setMembers(data))
+            .catch(err => console.error("Error fetching members:", err))
+    }, [])
+
+    return members
+}
+
 export default function NewMinistryPage() {
     const [state, formAction, isPending] = useActionState(createMinistry, initialState)
     const ministries = useMinistries()
+    const members = useMembers()
 
     return (
         <div className="max-w-2xl mx-auto">
+            <datalist id="members-list">
+                {members.map(member => (
+                    <option key={member.id} value={`${member.first_name} ${member.last_name}`} />
+                ))}
+            </datalist>
+
             <div className="flex items-center gap-4 mb-6">
                 <Link href="/dashboard/ministries" className="text-slate-400 hover:text-slate-800 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
@@ -84,8 +105,10 @@ export default function NewMinistryPage() {
                                 id="leader_name"
                                 name="leader_name"
                                 type="text"
+                                list="members-list"
                                 placeholder="Quién lo dirige"
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
+                                autoComplete="off"
                             />
                         </div>
 
@@ -97,8 +120,10 @@ export default function NewMinistryPage() {
                                 id="coleader_name"
                                 name="coleader_name"
                                 type="text"
+                                list="members-list"
                                 placeholder="Mano derecha"
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
+                                autoComplete="off"
                             />
                         </div>
                     </div>
