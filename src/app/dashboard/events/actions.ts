@@ -107,10 +107,38 @@ export async function updateEvent(eventId: string, prevState: any, formData: For
     const recurrenceEndDateStr = formData.get('recurrence_end_date') as string
     const visibility = formData.get('visibility') as EventVisibility || 'PUBLIC'
     const ministryId = formData.get('ministry_id') as string
-    const imageUrl = formData.get('image_url') as string
+
+    let imageUrl = formData.get('image_url') as string
+    const imageFile = formData.get('image_file') as File | null
 
     if (!title || !startDateStr || !endDateStr) {
         return { error: 'Título, Fecha de Inicio y Fecha de Fin son obligatorios.' }
+    }
+
+    // Subir imagen directa si existe
+    if (imageFile && imageFile.size > 0) {
+        const supabase = await createClient()
+        const fileExt = imageFile.name.split('.').pop()
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+        const filePath = `events/${userChurch.church_id}/${fileName}`
+
+        const { error: uploadError } = await supabase.storage
+            .from('public_assets')
+            .upload(filePath, imageFile, {
+                cacheControl: '3600',
+                upsert: false
+            })
+
+        if (uploadError) {
+            console.error('Error uploading image:', uploadError)
+            return { error: 'No se pudo subir la imagen.' }
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('public_assets')
+            .getPublicUrl(filePath)
+
+        imageUrl = publicUrl
     }
 
     try {

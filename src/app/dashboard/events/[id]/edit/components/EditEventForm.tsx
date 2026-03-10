@@ -73,18 +73,33 @@ export function EditEventForm({ event }: { event: Event }) {
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="image_url">
-                            Imagen Destacada (URL Opcional)
-                        </label>
-                        <input
-                            id="image_url"
-                            name="image_url"
-                            type="url"
-                            defaultValue={event.image_url || ''}
-                            placeholder="https://ejemplo.com/foto.jpg"
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="image_url">
+                                Imagen Destacada (URL)
+                            </label>
+                            <input
+                                id="image_url"
+                                name="image_url"
+                                type="url"
+                                defaultValue={event.image_url || ''}
+                                placeholder="https://ejemplo.com/foto.jpg"
+                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="image_file">
+                                O Subir Archivo
+                            </label>
+                            <input
+                                id="image_file"
+                                name="image_file"
+                                type="file"
+                                accept="image/*"
+                                className="w-full px-4 py-1.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
