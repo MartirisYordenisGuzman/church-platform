@@ -131,7 +131,7 @@ export async function updateEvent(eventId: string, prevState: any, formData: For
 
         if (uploadError) {
             console.error('Error uploading image:', uploadError)
-            return { error: 'No se pudo subir la imagen.' }
+            return { error: `Error de Supabase: ${uploadError.message}` }
         }
 
         const { data: { publicUrl } } = supabase.storage
