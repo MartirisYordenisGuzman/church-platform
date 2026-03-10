@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, addMonths, subMonths, isSameMonth, isSameDay, getDay, isAfter, isBefore, addWeeks, subWeeks, startOfWeek, endOfWeek } from 'date-fns'
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, addMonths, subMonths, isSameMonth, isSameDay, addWeeks, subWeeks, startOfWeek, endOfWeek } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 // Asumiremos que eventService o el servidor nos inyecta los eventos directamente
@@ -36,7 +36,7 @@ export default function EventCalendar({ initialEvents }: { initialEvents: Calend
         const instances: (CalendarEvent & { instanceDate: Date })[] = []
 
         initialEvents.forEach(event => {
-            let currentInstance = new Date(event.start_date)
+            const currentInstance = new Date(event.start_date)
             // Límite de la recurrencia o final del mes
             const recurStop = event.recurrence_end_date ? new Date(event.recurrence_end_date) : new Date(end.getFullYear() + 1, end.getMonth(), end.getDate());
 
@@ -45,7 +45,7 @@ export default function EventCalendar({ initialEvents }: { initialEvents: Calend
 
             if (event.recurrence === 'NONE') {
                 if (currentInstance >= start && currentInstance <= end) {
-                    instances.push({ ...event, instanceDate: currentInstance })
+                    instances.push({ ...event, instanceDate: new Date(currentInstance) })
                 }
             } else {
                 // Cálculo simple de recurrencia en cliente
@@ -159,6 +159,48 @@ export default function EventCalendar({ initialEvents }: { initialEvents: Calend
                         )
                     })}
                 </div>
+            </div>
+
+            {/* Nueva sección: Tarjetas de Eventos */}
+            <div className="p-6 bg-slate-50 border-t border-slate-200">
+                <h3 className="text-xl font-bold text-slate-800 mb-6">
+                    Eventos de {viewMode === 'month' ? 'este mes' : 'esta semana'}
+                </h3>
+
+                {visibleEvents.length === 0 ? (
+                    <div className="text-center py-8 text-slate-500">
+                        No hay eventos programados para este período.
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {visibleEvents.map((event, idx) => (
+                            <div key={`${event.id}-${idx}`} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+                                <div className="h-3 bg-blue-600 w-full"></div>
+                                <div className="p-6">
+                                    <div className="text-sm font-semibold text-blue-600 mb-2 capitalize">
+                                        {format(event.instanceDate, "EEEE d 'de' MMMM", { locale: es })}
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-900 mb-2">{event.title}</h3>
+                                    {event.description && (
+                                        <p className="text-slate-600 text-sm mb-4 line-clamp-3">
+                                            {event.description}
+                                        </p>
+                                    )}
+                                    <div className="space-y-2 mt-4 text-sm text-slate-500">
+                                        <div className="flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                            {format(event.instanceDate, 'HH:mm')} hrs
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                            {event.location || 'Por definir'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     )
