@@ -50,8 +50,7 @@ const initialState = { error: '' }
 
 export function EditMinistryForm({ ministry: initialMinistry }: { ministry: any }) {
     const ministry = initialMinistry
-    const updateMinistryWithId = updateMinistry.bind(null, ministry.id)
-    const [state, formAction, isPending] = useActionState(updateMinistryWithId, initialState)
+    const [state, formAction, isPending] = useActionState(updateMinistry, initialState)
     const ministries = useMinistries()
     const members = useMembers()
 

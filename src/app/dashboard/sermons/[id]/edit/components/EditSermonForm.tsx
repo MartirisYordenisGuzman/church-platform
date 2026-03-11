@@ -1,11 +1,10 @@
 'use client'
 
 import { useActionState } from 'react'
-import { updateSermon } from '../../actions'
+import { updateSermon } from '../../../actions'
 import Link from 'next/link'
-import { Sermon } from '@prisma/client'
+// import { Sermon } from '@prisma/client'
 import {
-    Video,
     Youtube,
     Type,
     User,
@@ -13,17 +12,14 @@ import {
     Sparkles,
     ChevronLeft,
     MonitorPlay,
-    CloudUpload,
     AlertCircle,
-    Save,
-    Link as LinkIcon
+    Save
 } from 'lucide-react'
 
 const initialState = { error: '' }
 
-export function EditSermonForm({ sermon }: { sermon: Sermon }) {
-    const updateSermonWithId = updateSermon.bind(null, sermon.id)
-    const [state, formAction, isPending] = useActionState(updateSermonWithId, initialState)
+export function EditSermonForm({ sermon }: { sermon: any }) {
+    const [state, formAction, isPending] = useActionState(updateSermon, initialState)
 
     // Format date for input
     const formattedDate = sermon.date ? new Date(sermon.date).toISOString().split('T')[0] : ''
