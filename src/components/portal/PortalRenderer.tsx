@@ -1,5 +1,8 @@
 import Link from "next/link"
+import Image from "next/image"
 import { ChurchProfile } from "@/types/church"
+
+type BlockData = any // Using any for Json compatibility, filtered by ESLint suppression if needed, but better than non-existent type
 
 export default function PortalRenderer({ church }: { church: ChurchProfile }) {
     const blocks = church.portalConfig?.blocks || []
@@ -21,13 +24,13 @@ export default function PortalRenderer({ church }: { church: ChurchProfile }) {
                     case 'hero':
                         return <HeroBlock key={block.id} church={church} data={block.data} />
                     case 'events':
-                        return <EventsBlock key={block.id} church={church} data={block.data} layout={church.portalConfig?.layout} />
+                        return <EventsBlock key={block.id} church={church} data={block.data} layout={church.portalConfig?.layout || undefined} />
                     case 'sermons':
-                        return <SermonsBlock key={block.id} church={church} data={block.data} layout={church.portalConfig?.layout} />
+                        return <SermonsBlock key={block.id} church={church} data={block.data} layout={church.portalConfig?.layout || undefined} />
                     case 'ministries':
-                        return <MinistriesBlock key={block.id} church={church} data={block.data} layout={church.portalConfig?.layout} />
+                        return <MinistriesBlock key={block.id} church={church} data={block.data} layout={church.portalConfig?.layout || undefined} />
                     case 'custom_text':
-                        return <CustomTextBlock key={block.id} church={church} data={block.data} />
+                        return <CustomTextBlock key={block.id} data={block.data as any} />
                     default:
                         return null
                 }
@@ -38,7 +41,7 @@ export default function PortalRenderer({ church }: { church: ChurchProfile }) {
 
 // --- BLOCK COMPONENTS ---
 
-function HeroBlock({ church, data }: { church: ChurchProfile, data: any }) {
+function HeroBlock({ church, data }: { church: ChurchProfile, data: BlockData }) {
     const title = data?.title || `Bienvenidos a ${church.name}`
     const subtitle = data?.subtitle || church.description || "Un espacio para conectar con Dios y crecer en comunidad."
 
@@ -81,7 +84,7 @@ function HeroBlock({ church, data }: { church: ChurchProfile, data: any }) {
     )
 }
 
-function EventsBlock({ church, data, layout }: { church: ChurchProfile, data: any, layout?: string }) {
+function EventsBlock({ church, data, layout }: { church: ChurchProfile, data: BlockData, layout?: string }) {
     const title = data?.title || 'Próximos Eventos'
     const isMultiPage = layout === 'MULTI_PAGE'
 
@@ -125,7 +128,7 @@ function EventsBlock({ church, data, layout }: { church: ChurchProfile, data: an
     )
 }
 
-function SermonsBlock({ church, data, layout }: { church: ChurchProfile, data: any, layout?: string }) {
+function SermonsBlock({ church, data, layout }: { church: ChurchProfile, data: BlockData, layout?: string }) {
     const title = data?.title || 'Últimas Prédicas'
     const subtitle = data?.subtitle || 'Edifica tu vida con los mensajes más recientes.'
     const isMultiPage = layout === 'MULTI_PAGE'
@@ -144,7 +147,12 @@ function SermonsBlock({ church, data, layout }: { church: ChurchProfile, data: a
                             church.sermons.map(sermon => (
                                 <div key={sermon.id} className="group cursor-pointer">
                                     <div className="aspect-video bg-slate-200 rounded-3xl mb-4 overflow-hidden relative">
-                                        <img src={`https://img.youtube.com/vi/${sermon.youtube_video_id}/maxresdefault.jpg`} alt={sermon.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                        <Image
+                                            src={`https://img.youtube.com/vi/${sermon.youtube_video_id}/maxresdefault.jpg`}
+                                            alt={sermon.title}
+                                            fill
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
                                         <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors flex items-center justify-center">
                                             <div className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-[var(--color-primary)] shadow-lg transform group-hover:scale-110 transition-transform">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -173,7 +181,7 @@ function SermonsBlock({ church, data, layout }: { church: ChurchProfile, data: a
     )
 }
 
-function MinistriesBlock({ church, data, layout }: { church: ChurchProfile, data: any, layout?: string }) {
+function MinistriesBlock({ church, data, layout }: { church: ChurchProfile, data: BlockData, layout?: string }) {
     const title = data?.title || 'Nuestros Ministerios'
     const isMultiPage = layout === 'MULTI_PAGE'
 
@@ -231,6 +239,22 @@ function MinistriesBlock({ church, data, layout }: { church: ChurchProfile, data
                         </Link>
                     </div>
                 )}
+            </div>
+        </section>
+    )
+}
+
+function CustomTextBlock({ data }: { data: BlockData }) {
+    const content = data?.content || ""
+    const title = data?.title
+
+    return (
+        <section className="py-20 px-4 bg-white border-b border-slate-100">
+            <div className="container mx-auto max-w-4xl">
+                {title && <h2 className="text-3xl font-bold mb-8 text-slate-900">{title}</h2>}
+                <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap">
+                    {content || <p className="text-slate-400 italic">No hay contenido definido para este bloque.</p>}
+                </div>
             </div>
         </section>
     )
