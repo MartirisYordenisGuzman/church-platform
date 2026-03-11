@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { updateMember } from '../../../actions'
+import { updateMember } from '../../../actions' // Vercel path fix v2
 import Link from 'next/link'
 // import { Member } from '@prisma/client' // Removing problematic export
 import {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { updateSermon } from '../../../actions'
+import { updateSermon } from '../../../actions' // Vercel path fix v2
 import Link from 'next/link'
 // import { Sermon } from '@prisma/client'
 import {
