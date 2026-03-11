@@ -1,8 +1,9 @@
 'use client'
 
 import { useActionState } from 'react'
-import { createMember } from '../actions'
+import { updateMember } from '../../actions'
 import Link from 'next/link'
+import { Member } from '@prisma/client'
 import {
     Users,
     UserPlus,
@@ -12,16 +13,20 @@ import {
     Cake,
     ChevronLeft,
     User,
-    Rocket,
+    Save,
     AlertCircle,
     Sparkles,
-    CheckCircle2
+    Calendar
 } from 'lucide-react'
 
 const initialState = { error: '' }
 
-export default function NewMemberPage() {
-    const [state, formAction, isPending] = useActionState(createMember, initialState)
+export function EditMemberForm({ member: initialMember }: { member: any }) {
+    const member = initialMember
+    const [state, formAction, isPending] = useActionState(updateMember, initialState)
+
+    // Format date for input
+    const formattedBirthDate = member.birth_date ? new Date(member.birth_date).toISOString().split('T')[0] : ''
 
     return (
         <div className="max-w-3xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -35,8 +40,8 @@ export default function NewMemberPage() {
                         <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
                     <div>
-                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-1">Registrar <span className="text-indigo-600">Persona</span></h1>
-                        <p className="text-slate-500 text-lg font-light">Agrega un nuevo integrante al directorio de tu congregación.</p>
+                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-1">Editar <span className="text-indigo-600">Persona</span></h1>
+                        <p className="text-slate-500 text-lg font-light">Actualizando perfil de: <span className="font-bold text-slate-700">{member.first_name} {member.last_name}</span></p>
                     </div>
                 </div>
             </div>
@@ -45,6 +50,7 @@ export default function NewMemberPage() {
             <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden">
                 <div className="p-8 md:p-12">
                     <form action={formAction} className="space-y-10">
+                        <input type="hidden" name="id" value={member.id} />
 
                         {/* Section: Personal Identity */}
                         <div className="space-y-6">
@@ -65,6 +71,7 @@ export default function NewMemberPage() {
                                         id="first_name"
                                         name="first_name"
                                         type="text"
+                                        defaultValue={member.first_name}
                                         placeholder="Ej: Mateo"
                                         className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white transition-all caret-indigo-600"
                                         required
@@ -80,6 +87,7 @@ export default function NewMemberPage() {
                                         id="last_name"
                                         name="last_name"
                                         type="text"
+                                        defaultValue={member.last_name}
                                         placeholder="Ej: García"
                                         className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white transition-all caret-indigo-600"
                                         required
@@ -107,6 +115,7 @@ export default function NewMemberPage() {
                                         id="email"
                                         name="email"
                                         type="email"
+                                        defaultValue={member.email || ''}
                                         placeholder="correo@ejemplo.com"
                                         className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white transition-all caret-emerald-600"
                                     />
@@ -121,6 +130,7 @@ export default function NewMemberPage() {
                                         id="phone"
                                         name="phone"
                                         type="tel"
+                                        defaultValue={member.phone || ''}
                                         placeholder="+1 809 000 0000"
                                         className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white transition-all caret-emerald-600"
                                     />
@@ -146,9 +156,9 @@ export default function NewMemberPage() {
                                     id="birth_date"
                                     name="birth_date"
                                     type="date"
+                                    defaultValue={formattedBirthDate}
                                     className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/5 focus:border-amber-500 focus:bg-white transition-all caret-amber-600 cursor-pointer"
                                 />
-                                <p className="px-2 text-[10px] text-slate-400 font-medium italic">Esto nos ayudará a recordarte los cumpleaños en el dashboard.</p>
                             </div>
                         </div>
 
@@ -175,43 +185,17 @@ export default function NewMemberPage() {
                                 {isPending ? (
                                     <>
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        <span>Registrando...</span>
+                                        <span>Guardando...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <UserPlus size={18} className="group-hover:scale-110 transition-transform" />
-                                        <span>Registrar en Directorio</span>
+                                        <Save size={18} className="group-hover:scale-110 transition-transform" />
+                                        <span>Guardar Cambios</span>
                                     </>
                                 )}
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
-
-            {/* Quick Benefits */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12">
-                <div className="p-8 bg-indigo-50/50 rounded-[2.5rem] border border-indigo-50 flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
-                        <CheckCircle2 size={18} />
-                    </div>
-                    <div>
-                        <h4 className="font-black text-indigo-900 text-sm uppercase tracking-widest mb-1">Membresía Digital</h4>
-                        <p className="text-indigo-700/70 text-xs leading-relaxed">
-                            Al registrar a alguien, podrás asignarlo luego a ministerios y seguir su crecimiento.
-                        </p>
-                    </div>
-                </div>
-                <div className="p-8 bg-emerald-50/50 rounded-[2.5rem] border border-emerald-50 flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-emerald-600 shadow-sm shrink-0">
-                        <CheckCircle2 size={18} />
-                    </div>
-                    <div>
-                        <h4 className="font-black text-emerald-900 text-sm uppercase tracking-widest mb-1">Privacidad Total</h4>
-                        <p className="text-emerald-700/70 text-xs leading-relaxed">
-                            Los datos de contacto son privados y solo accesibles por los administradores de la iglesia.
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>

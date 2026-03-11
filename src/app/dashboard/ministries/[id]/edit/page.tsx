@@ -1,9 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { EditEventForm } from '@/app/dashboard/events/[id]/edit/components/EditEventForm'
+import { EditMinistryForm } from './components/EditMinistryForm'
 
-export default async function EditEventPage({
+export default async function EditMinistryPage({
     params,
 }: {
     params: Promise<{ id: string }>
@@ -21,19 +21,17 @@ export default async function EditEventPage({
 
     if (!userChurch) redirect('/dashboard')
 
-    const event = await prisma.event.findUnique({
+    const ministry = await prisma.ministry.findUnique({
         where: { id, church_id: userChurch.church_id }
     })
 
-    if (!event) {
+    if (!ministry) {
         notFound()
     }
 
-    // Pass the standard event payload to a Client Component
-    // This allows interactivity (Action State, Ministry fetch, etc)
     return (
-        <div className="max-w-2xl mx-auto">
-            <EditEventForm event={event} />
+        <div className="max-w-3xl mx-auto">
+            <EditMinistryForm ministry={ministry} />
         </div>
     )
 }

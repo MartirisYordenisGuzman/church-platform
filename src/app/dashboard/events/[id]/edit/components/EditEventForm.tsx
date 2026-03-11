@@ -4,6 +4,24 @@ import { useActionState, useEffect, useState } from 'react'
 import { updateEvent } from '../../../actions'
 import Link from 'next/link'
 import { Event } from '@prisma/client'
+import {
+    Calendar,
+    Type,
+    Image as ImageIcon,
+    MapPin,
+    Clock,
+    Repeat,
+    Eye,
+    Users,
+    AlignLeft,
+    ChevronLeft,
+    Plus,
+    Rocket,
+    AlertCircle,
+    Sparkles,
+    Upload,
+    Save
+} from 'lucide-react'
 
 // Cargar ministerios para llenar el selector
 function useMinistries() {
@@ -37,218 +55,282 @@ function formatDateOnly(date: Date | null) {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-export function EditEventForm({ event }: { event: Event }) {
-    // We bind the event ID to the action here so we don't have to keep it in a hidden input
+export function EditEventForm({ event: initialEvent }: { event: any }) {
+    const event = initialEvent
     const updateEventWithId = updateEvent.bind(null, event.id)
     const [state, formAction, isPending] = useActionState(updateEventWithId, initialState)
     const ministries = useMinistries()
 
     return (
-        <div className="max-w-2xl mx-auto">
-            <div className="flex items-center gap-4 mb-6">
-                <Link href="/dashboard/events" className="text-slate-400 hover:text-slate-800 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
-                </Link>
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-900">Editar Evento</h1>
-                    <p className="text-slate-500">Actualizando: {event.title}</p>
+        <div className="max-w-3xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div className="flex items-center gap-6">
+                    <Link
+                        href="/dashboard/events"
+                        className="w-12 h-12 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all group"
+                    >
+                        <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
+                    </Link>
+                    <div>
+                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-1">Editar <span className="text-indigo-600">Evento</span></h1>
+                        <p className="text-slate-500 text-lg font-light">Actualizando: <span className="font-bold text-slate-700">{event.title}</span></p>
+                    </div>
                 </div>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-                <form action={formAction} className="flex flex-col gap-6">
+            {/* Main Form Card */}
+            <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div className="p-8 md:p-12">
+                    <form action={formAction} className="space-y-10">
 
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="title">
-                            Título del Evento <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            id="title"
-                            name="title"
-                            type="text"
-                            defaultValue={event.title}
-                            placeholder="Ej: Servicio de Acción de Gracias"
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
-                            required
-                        />
-                    </div>
+                        {/* Section: Basic Info */}
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                    <Sparkles size={16} />
+                                </div>
+                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Información Básica</h3>
+                            </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="image_url">
-                                Imagen Destacada (URL)
-                            </label>
-                            <input
-                                id="image_url"
-                                name="image_url"
-                                type="url"
-                                defaultValue={event.image_url || ''}
-                                placeholder="https://ejemplo.com/foto.jpg"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
-                            />
+                            <div className="space-y-3">
+                                <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest" htmlFor="title">
+                                    <Type size={14} className="text-indigo-500" />
+                                    Título del Evento <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    id="title"
+                                    name="title"
+                                    type="text"
+                                    defaultValue={event.title}
+                                    placeholder="Ej: Servicio Especial de Adoración"
+                                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white transition-all"
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-3">
+                                    <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest" htmlFor="image_url">
+                                        <ImageIcon size={14} className="text-indigo-500" />
+                                        Imagen (URL)
+                                    </label>
+                                    <input
+                                        id="image_url"
+                                        name="image_url"
+                                        type="url"
+                                        defaultValue={event.image_url || ''}
+                                        placeholder="https://..."
+                                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-medium placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white transition-all"
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest" htmlFor="image_file">
+                                        <Upload size={14} className="text-indigo-500" />
+                                        O Subir Archivo
+                                    </label>
+                                    <div className="relative group/file">
+                                        <input
+                                            id="image_file"
+                                            name="image_file"
+                                            type="file"
+                                            accept="image/*"
+                                            className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-medium text-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all file:hidden cursor-pointer"
+                                        />
+                                        <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-indigo-500 font-bold text-xs flex items-center gap-2">
+                                            <Plus size={14} /> Reemplazar
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="image_file">
-                                O Subir Archivo
-                            </label>
-                            <input
-                                id="image_file"
-                                name="image_file"
-                                type="file"
-                                accept="image/*"
-                                className="w-full px-4 py-1.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                            />
+                        {/* Section: Schedule */}
+                        <div className="space-y-6 pt-4 border-t border-slate-50">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                    <Clock size={16} />
+                                </div>
+                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Horario y Lugar</h3>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-3">
+                                    <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest" htmlFor="start_date">
+                                        <Calendar size={14} className="text-emerald-500" />
+                                        Inicia <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        id="start_date"
+                                        name="start_date"
+                                        type="datetime-local"
+                                        defaultValue={formatForInput(event.start_date)}
+                                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white transition-all"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest" htmlFor="end_date">
+                                        <Clock size={14} className="text-emerald-500" />
+                                        Termina <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        id="end_date"
+                                        name="end_date"
+                                        type="datetime-local"
+                                        defaultValue={formatForInput(event.end_date)}
+                                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white transition-all"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest" htmlFor="location">
+                                    <MapPin size={14} className="text-emerald-500" />
+                                    Ubicación / Modalidad
+                                </label>
+                                <input
+                                    id="location"
+                                    name="location"
+                                    type="text"
+                                    defaultValue={event.location || ''}
+                                    placeholder="Ej: Auditorio Principal, Zoom, o Calle #123"
+                                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-medium placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white transition-all"
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="start_date">
-                                Inicia (Fecha y Hora) <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                id="start_date"
-                                name="start_date"
-                                type="datetime-local"
-                                defaultValue={formatForInput(event.start_date)}
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
-                                required
-                            />
+                        {/* Section: Advanced Configuration */}
+                        <div className="space-y-6 pt-4 border-t border-slate-50">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                                    <Repeat size={16} />
+                                </div>
+                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Configuración Avanzada</h3>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-3">
+                                    <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest" htmlFor="recurrence">
+                                        Frecuencia de Repetición
+                                    </label>
+                                    <select
+                                        id="recurrence"
+                                        name="recurrence"
+                                        defaultValue={event.recurrence}
+                                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/5 focus:border-amber-500 focus:bg-white transition-all appearance-none cursor-pointer"
+                                    >
+                                        <option value="NONE">No se repite</option>
+                                        <option value="DAILY">Diariamente</option>
+                                        <option value="WEEKLY">Semanalmente</option>
+                                        <option value="MONTHLY">Mensualmente</option>
+                                        <option value="YEARLY">Anualmente</option>
+                                    </select>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest" htmlFor="recurrence_end_date">
+                                        Fecha Límite Repetición
+                                    </label>
+                                    <input
+                                        id="recurrence_end_date"
+                                        name="recurrence_end_date"
+                                        type="date"
+                                        defaultValue={formatDateOnly(event.recurrence_end_date)}
+                                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/5 focus:border-amber-500 focus:bg-white transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-3">
+                                    <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest" htmlFor="visibility">
+                                        Visibilidad
+                                    </label>
+                                    <select
+                                        id="visibility"
+                                        name="visibility"
+                                        defaultValue={event.visibility}
+                                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/5 focus:border-amber-500 focus:bg-white transition-all appearance-none cursor-pointer"
+                                    >
+                                        <option value="PUBLIC">Público (Todo el mundo)</option>
+                                        <option value="PRIVATE">Privado (Solo Miembros)</option>
+                                        <option value="MINISTRY">Solo Ministerio</option>
+                                    </select>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest" htmlFor="ministry_id">
+                                        Vincular a Ministerio
+                                    </label>
+                                    <select
+                                        id="ministry_id"
+                                        name="ministry_id"
+                                        defaultValue={event.ministry_id || ''}
+                                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/5 focus:border-amber-500 focus:bg-white transition-all appearance-none cursor-pointer"
+                                    >
+                                        <option value="">Ninguno (Evento General)</option>
+                                        {ministries.map(min => (
+                                            <option key={min.id} value={min.id}>{min.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest" htmlFor="description">
+                                    <AlignLeft size={14} className="text-amber-500" />
+                                    Detalles Adicionales
+                                </label>
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                    rows={4}
+                                    defaultValue={event.description || ''}
+                                    placeholder="Añade cualquier información extra que tus miembros deban saber..."
+                                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-medium placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-amber-500/5 focus:border-amber-500 focus:bg-white transition-all resize-none leading-relaxed"
+                                ></textarea>
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="end_date">
-                                Termina (Fecha y Hora) <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                id="end_date"
-                                name="end_date"
-                                type="datetime-local"
-                                defaultValue={formatForInput(event.end_date)}
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
-                                required
-                            />
-                        </div>
-                    </div>
+                        {state?.error && (
+                            <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-sm font-bold flex items-center gap-3">
+                                <AlertCircle size={20} />
+                                {state.error}
+                            </div>
+                        )}
 
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="location">
-                            Ubicación
-                        </label>
-                        <input
-                            id="location"
-                            name="location"
-                            type="text"
-                            defaultValue={event.location || ''}
-                            placeholder="Ej: Auditorio Principal o Zoom"
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="recurrence">
-                                Repetición del Evento
-                            </label>
-                            <select
-                                id="recurrence"
-                                name="recurrence"
-                                defaultValue={event.recurrence}
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
+                        {/* Footer / Buttons */}
+                        <div className="pt-10 flex flex-col sm:flex-row justify-end gap-4 border-t border-slate-50">
+                            <Link
+                                href="/dashboard/events"
+                                className="px-10 py-4 bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 rounded-2xl font-bold transition-all text-center"
                             >
-                                <option value="NONE">No se repite (Un solo día)</option>
-                                <option value="DAILY">Diariamente</option>
-                                <option value="WEEKLY">Semanalmente</option>
-                                <option value="MONTHLY">Mensualmente</option>
-                                <option value="YEARLY">Anualmente</option>
-                            </select>
+                                Cancelar
+                            </Link>
+                            <button
+                                type="submit"
+                                disabled={isPending}
+                                className="group px-10 py-4 bg-indigo-600 hover:bg-slate-900 disabled:bg-slate-200 text-white rounded-2xl font-black transition-all shadow-xl shadow-indigo-200 flex items-center justify-center gap-3 active:scale-95"
+                            >
+                                {isPending ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        <span>Actualizando...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save size={18} className="group-hover:scale-110 transition-transform" />
+                                        <span>Actualizar Evento</span>
+                                    </>
+                                )}
+                            </button>
                         </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="recurrence_end_date">
-                                Repetir hasta (Opcional)
-                            </label>
-                            <input
-                                id="recurrence_end_date"
-                                name="recurrence_end_date"
-                                type="date"
-                                defaultValue={formatDateOnly(event.recurrence_end_date)}
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="visibility">
-                            Visibilidad (Quién puede ver esto)
-                        </label>
-                        <select
-                            id="visibility"
-                            name="visibility"
-                            defaultValue={event.visibility}
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
-                        >
-                            <option value="PUBLIC">Público (Visible en el portal web de la iglesia)</option>
-                            <option value="PRIVATE">Privado (Solo miembros con sesión iniciada)</option>
-                            <option value="MINISTRY">Solo Ministerio (Solo para un grupo específico)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="ministry_id">
-                            Asignar a un Ministerio (Opcional)
-                        </label>
-                        <select
-                            id="ministry_id"
-                            name="ministry_id"
-                            defaultValue={event.ministry_id || ''}
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50"
-                        >
-                            <option value="">Ninguno (Evento General)</option>
-                            {ministries.map(min => (
-                                <option key={min.id} value={min.id}>{min.name}</option>
-                            ))}
-                        </select>
-                        <p className="text-xs text-slate-500 mt-1">Si este evento es solo para un grupo en específico, selecciónalo aquí para que aparezca en su página.</p>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="description">
-                            Descripción Corta
-                        </label>
-                        <textarea
-                            id="description"
-                            name="description"
-                            rows={3}
-                            defaultValue={event.description || ''}
-                            placeholder="Detalles sobre el evento..."
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 resize-none"
-                        ></textarea>
-                    </div>
-
-                    {state?.error && (
-                        <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
-                            {state.error}
-                        </div>
-                    )}
-
-                    <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
-                        <Link
-                            href="/dashboard/events"
-                            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg font-medium transition-colors"
-                        >
-                            Cancelar
-                        </Link>
-                        <button
-                            type="submit"
-                            disabled={isPending}
-                            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
-                        >
-                            {isPending ? 'Guardando...' : 'Actualizar Evento'}
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     )

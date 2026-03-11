@@ -1,8 +1,9 @@
 'use client'
 
 import { useActionState } from 'react'
-import { createSermon } from '../actions'
+import { updateSermon } from '../../actions'
 import Link from 'next/link'
+import { Sermon } from '@prisma/client'
 import {
     Video,
     Youtube,
@@ -14,14 +15,18 @@ import {
     MonitorPlay,
     CloudUpload,
     AlertCircle,
-    Rocket,
+    Save,
     Link as LinkIcon
 } from 'lucide-react'
 
 const initialState = { error: '' }
 
-export default function NewSermonPage() {
-    const [state, formAction, isPending] = useActionState(createSermon, initialState)
+export function EditSermonForm({ sermon }: { sermon: Sermon }) {
+    const updateSermonWithId = updateSermon.bind(null, sermon.id)
+    const [state, formAction, isPending] = useActionState(updateSermonWithId, initialState)
+
+    // Format date for input
+    const formattedDate = sermon.date ? new Date(sermon.date).toISOString().split('T')[0] : ''
 
     return (
         <div className="max-w-3xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -35,8 +40,8 @@ export default function NewSermonPage() {
                         <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
                     <div>
-                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-1">Subir <span className="text-indigo-600">Prédica</span></h1>
-                        <p className="text-slate-500 text-lg font-light">Agrega una nueva enseñanza a tu videoteca digital.</p>
+                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-1">Editar <span className="text-indigo-600">Prédica</span></h1>
+                        <p className="text-slate-500 text-lg font-light">Actualizando: <span className="font-bold text-slate-700">{sermon.title}</span></p>
                     </div>
                 </div>
             </div>
@@ -45,6 +50,7 @@ export default function NewSermonPage() {
             <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden">
                 <div className="p-8 md:p-12">
                     <form action={formAction} className="space-y-10">
+                        <input type="hidden" name="id" value={sermon.id} />
 
                         {/* Section: YouTube Integration */}
                         <div className="space-y-6">
@@ -67,12 +73,12 @@ export default function NewSermonPage() {
                                         id="youtube_url"
                                         name="youtube_url"
                                         type="url"
+                                        defaultValue={`https://www.youtube.com/watch?v=${sermon.youtube_video_id}`}
                                         placeholder="Copia aquí el enlace: https://www.youtube.com/watch?v=..."
                                         className="w-full pl-16 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 focus:bg-white transition-all caret-red-600"
                                         required
                                     />
                                 </div>
-                                <p className="px-2 text-[10px] text-slate-400 font-medium italic">Sincronizaremos automáticamente la miniatura y los metadatos.</p>
                             </div>
                         </div>
 
@@ -94,6 +100,7 @@ export default function NewSermonPage() {
                                     id="title"
                                     name="title"
                                     type="text"
+                                    defaultValue={sermon.title}
                                     placeholder="Ej: El Poder de la Oración Perseverante"
                                     className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white transition-all caret-indigo-600"
                                     required
@@ -110,6 +117,7 @@ export default function NewSermonPage() {
                                         id="preacher"
                                         name="preacher"
                                         type="text"
+                                        defaultValue={sermon.preacher}
                                         placeholder="Ej: Pastor David Wilkerson"
                                         className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white transition-all caret-indigo-600"
                                         required
@@ -125,6 +133,7 @@ export default function NewSermonPage() {
                                         id="date"
                                         name="date"
                                         type="date"
+                                        defaultValue={formattedDate}
                                         className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white transition-all caret-indigo-600"
                                         required
                                     />
@@ -140,6 +149,7 @@ export default function NewSermonPage() {
                                     id="series"
                                     name="series"
                                     type="text"
+                                    defaultValue={sermon.series || ''}
                                     placeholder="Ej: Fundamentos de la Fe Cristiana"
                                     className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-amber-500/5 focus:border-amber-500 focus:bg-white transition-all caret-amber-600"
                                 />
@@ -169,30 +179,17 @@ export default function NewSermonPage() {
                                 {isPending ? (
                                     <>
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        <span>Procesando...</span>
+                                        <span>Actualizando...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <CloudUpload size={18} className="group-hover:translate-y-[-2px] transition-transform" />
-                                        <span>Publicar Videoprédica</span>
+                                        <Save size={18} className="group-hover:scale-110 transition-transform" />
+                                        <span>Actualizar Prédica</span>
                                     </>
                                 )}
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
-
-            {/* Support Info */}
-            <div className="bg-indigo-50/50 p-8 rounded-[2.5rem] border border-indigo-100 flex items-center gap-6">
-                <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-indigo-600 flex-shrink-0">
-                    <LinkIcon size={24} />
-                </div>
-                <div>
-                    <h4 className="text-indigo-900 font-black text-sm uppercase tracking-widest mb-1">Tip de Plataforma</h4>
-                    <p className="text-indigo-700/70 text-sm font-light leading-relaxed">
-                        Asegúrate de que el video en YouTube sea <strong>Público</strong> o <strong>Oculto</strong> para que tus miembros puedan verlo sin problemas desde el portal.
-                    </p>
                 </div>
             </div>
         </div>

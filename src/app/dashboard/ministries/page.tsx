@@ -3,6 +3,21 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { deleteMinistry } from './actions'
+import {
+    Users,
+    Plus,
+    Search,
+    Settings,
+    User,
+    ChevronRight,
+    Trash2,
+    Edit2,
+    Layers,
+    BookOpen,
+    ArrowUpRight,
+    Sparkles,
+    MoreHorizontal
+} from 'lucide-react'
 
 function DeleteButton({ id }: { id: string }) {
     return (
@@ -12,9 +27,11 @@ function DeleteButton({ id }: { id: string }) {
         }}>
             <button
                 type="submit"
-                className="text-red-600 hover:text-red-900 font-medium"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                title="Eliminar ministerio"
             >
-                Eliminar
+                <Trash2 size={16} />
+                <span className="md:hidden lg:inline">Eliminar</span>
             </button>
         </form>
     )
@@ -32,99 +49,170 @@ export default async function MinistriesDashboard() {
 
     if (!userChurch) redirect('/dashboard/settings')
 
-    // Obtenemos todos los ministerios de esta iglesia, organizados por jerarquía
+    // @ts-ignore
     const ministries = await prisma.ministry.findMany({
         where: { church_id: userChurch.church_id },
         include: {
-            departments: true, // Incluye sub-departamentos
+            // @ts-ignore
+            departments: true,
         },
         orderBy: { name: 'asc' }
-    })
+    }) as any[]
 
-    // Filtramos para mostrar solo los ministerios raíz (sin parent_id)
     const rootMinistries = ministries.filter(m => m.parent_id === null)
 
     return (
-        <div className="max-w-5xl">
-            <div className="flex justify-between items-center mb-6">
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 mb-2">Ministerios y Departamentos</h1>
-                    <p className="text-slate-500">Organiza la estructura de grupos, líderes y voluntarios de tu iglesia.</p>
+                    <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2 flex items-center gap-3">
+                        <Users className="text-indigo-600 w-8 h-8" />
+                        Ministerios y <span className="text-indigo-600">Grupos</span>
+                    </h1>
+                    <p className="text-slate-500 text-lg font-light">Estructura y lidera el trabajo de los diferentes equipos de tu comunidad.</p>
                 </div>
 
                 <Link
                     href="/dashboard/ministries/new"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2"
+                    className="group bg-indigo-600 hover:bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-xl shadow-indigo-200 hover:-translate-y-1 active:scale-95 flex items-center gap-3"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <Plus size={20} className="transition-transform group-hover:rotate-90" />
                     Nuevo Ministerio
                 </Link>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {[
+                    { label: 'Ministerios Base', count: rootMinistries.length, icon: Layers, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                    { label: 'Sub-departamentos', count: ministries.length - rootMinistries.length, icon: Sparkles, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                    { label: 'Líderes Activos', count: ministries.filter(m => m.leader_name).length, icon: User, color: 'text-blue-600', bg: 'bg-blue-50' },
+                    { label: 'Total Áreas', count: ministries.length, icon: BookOpen, color: 'text-pink-600', bg: 'bg-pink-50' },
+                ].map((stat, i) => (
+                    <div key={i} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 group">
+                        <div className={`w-12 h-12 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center transition-transform group-hover:scale-110`}>
+                            <stat.icon size={22} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
+                            <p className="text-2xl font-black text-slate-900 leading-none">{stat.count}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Content Section */}
+            <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                {/* Search Bar */}
+                <div className="p-8 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/30">
+                    <div className="relative w-full sm:w-96 group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Buscar ministerios..."
+                            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all"
+                        />
+                    </div>
+                </div>
+
                 {rootMinistries.length === 0 ? (
-                    <div className="p-12 text-center text-slate-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-slate-300 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                        <p className="text-lg mb-2">Aún no hay ministerios creados.</p>
-                        <p className="text-sm">Agrega el primer ministerio base y luego podrás crear sub-departamentos dentro de él.</p>
+                    <div className="p-24 text-center">
+                        <div className="w-24 h-24 bg-slate-50 text-slate-200 rounded-[2rem] flex items-center justify-center mx-auto mb-8">
+                            <Users size={48} strokeWidth={1} />
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-900 mb-4">No hay ministerios registrados</h3>
+                        <p className="text-slate-500 max-w-sm mx-auto text-lg font-light leading-relaxed mb-8">
+                            Comienza a organizar tu estructura eclesiástica creando los departamentos principales.
+                        </p>
+                        <Link
+                            href="/dashboard/ministries/new"
+                            className="group inline-flex items-center gap-3 bg-indigo-600 hover:bg-slate-900 text-white px-8 py-4 rounded-full font-bold transition-all shadow-xl shadow-indigo-200"
+                        >
+                            <Plus size={18} /> Crear Mi Primer Ministerio
+                        </Link>
                     </div>
                 ) : (
-                    <div className="divide-y divide-slate-100">
+                    <div className="divide-y divide-slate-50">
                         {rootMinistries.map((ministry) => (
-                            <div key={ministry.id} className="p-6 hover:bg-slate-50/50 transition-colors">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="flex gap-4 items-start">
-                                        <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center flex-shrink-0 mt-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                            <div key={ministry.id} className="p-10 group hover:bg-slate-50/30 transition-all duration-500">
+                                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-8">
+                                    <div className="flex gap-6 items-start">
+                                        <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-sm border border-indigo-100">
+                                            <Users size={28} />
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-bold text-slate-900">{ministry.name}</h3>
-                                            <p className="text-sm text-slate-500 max-w-xl mt-1">{ministry.description || <span className="italic">No hay descripción</span>}</p>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <h3 className="text-2xl font-black text-slate-900 tracking-tight">{ministry.name}</h3>
+                                                <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[9px] font-black uppercase tracking-widest">Base</span>
+                                            </div>
+                                            <p className="text-lg text-slate-500 font-light max-w-2xl leading-relaxed">
+                                                {ministry.description || 'Sin descripción asignada para este ministerio.'}
+                                            </p>
 
-                                            {/* Liderazgo Info */}
-                                            {(ministry.leader_name || ministry.coleader_name) && (
-                                                <div className="mt-3 flex gap-4 text-xs font-medium text-slate-600">
-                                                    {ministry.leader_name && (
-                                                        <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-100 rounded-md">
-                                                            Líder: {ministry.leader_name}
-                                                        </div>
-                                                    )}
-                                                    {ministry.coleader_name && (
-                                                        <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-100 rounded-md">
-                                                            Co-líder: {ministry.coleader_name}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
+                                            <div className="flex flex-wrap gap-3 mt-6">
+                                                {ministry.leader_name && (
+                                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-100 rounded-xl text-[11px] font-bold text-slate-600 shadow-sm">
+                                                        <User size={12} className="text-indigo-400" />
+                                                        Líder: <span className="text-slate-900">{ministry.leader_name}</span>
+                                                    </div>
+                                                )}
+                                                {ministry.coleader_name && (
+                                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-100 rounded-xl text-[11px] font-bold text-slate-600 shadow-sm">
+                                                        <User size={12} className="text-emerald-400" />
+                                                        Co-líder: <span className="text-slate-900">{ministry.coleader_name}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <Link href={`/dashboard/ministries/${ministry.id}`} className="text-blue-600 hover:text-blue-900 font-medium text-sm">
-                                            Miembros
+
+                                    <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto shrink-0">
+                                        <Link
+                                            href={`/dashboard/ministries/${ministry.id}`}
+                                            className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-6 py-3 rounded-2xl font-bold transition-all shadow-sm"
+                                        >
+                                            <Plus size={16} /> Gestionar Miembros
                                         </Link>
-                                        <DeleteButton id={ministry.id} />
+                                        <div className="flex items-center gap-2">
+                                            <Link
+                                                href={`/dashboard/ministries/${ministry.id}/edit`}
+                                                className="p-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all"
+                                                title="Editar"
+                                            >
+                                                <Edit2 size={20} />
+                                            </Link>
+                                            <DeleteButton id={ministry.id} />
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Renderizado de Sub-departamentos (solo 1 nivel de anidación por simplicidad visual) */}
-                                {ministry.departments.length > 0 && (
-                                    <div className="mt-4 ml-14 pl-4 border-l-2 border-slate-200 space-y-3">
-                                        {ministry.departments.map(dept => (
-                                            <div key={dept.id} className="bg-white border text-sm border-slate-200 rounded-lg p-3 flex justify-between items-center group hover:border-blue-300 transition-colors">
-                                                <div>
-                                                    <div className="font-semibold text-slate-800">{dept.name}</div>
-                                                    {(dept.leader_name || dept.coleader_name) && (
-                                                        <div className="text-xs text-slate-500 mt-0.5">
-                                                            {[dept.leader_name, dept.coleader_name].filter(Boolean).join(' & ')}
-                                                        </div>
-                                                    )}
+                                {ministry.departments && ministry.departments.length > 0 && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8 pt-8 border-t border-slate-50">
+                                        <div className="col-span-1 md:col-span-2 lg:col-span-3 mb-2">
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                                <Layers size={14} /> Sub-departamentos
+                                            </h4>
+                                        </div>
+                                        {ministry.departments.map((dept: any) => (
+                                            <div key={dept.id} className="group/dept flex items-center justify-between p-5 bg-slate-50/50 rounded-2xl border border-slate-50 hover:bg-white hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover/dept:text-indigo-500 transition-colors shadow-sm">
+                                                        <Sparkles size={18} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-slate-800 tracking-tight">{dept.name}</p>
+                                                        {(dept.leader_name) && (
+                                                            <p className="text-[10px] text-slate-400 font-medium">Liderado por {dept.leader_name}</p>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-3">
-                                                    <Link href={`/dashboard/ministries/${dept.id}`} className="text-blue-600 hover:text-blue-900 font-medium">
-                                                        Abrir
-                                                    </Link>
-                                                    <DeleteButton id={dept.id} />
-                                                </div>
+                                                <Link
+                                                    href={`/dashboard/ministries/${dept.id}`}
+                                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                                                >
+                                                    <ChevronRight size={20} />
+                                                </Link>
                                             </div>
                                         ))}
                                     </div>

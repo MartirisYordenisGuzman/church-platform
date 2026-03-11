@@ -3,6 +3,21 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { deleteSermon } from './actions'
+import { es } from 'date-fns/locale'
+import {
+    Video,
+    Upload,
+    Search,
+    Play,
+    User,
+    Youtube,
+    Trash2,
+    Edit2,
+    ExternalLink,
+    Sparkles,
+    MonitorPlay,
+    Plus
+} from 'lucide-react'
 
 function DeleteButton({ id }: { id: string }) {
     return (
@@ -12,9 +27,11 @@ function DeleteButton({ id }: { id: string }) {
         }}>
             <button
                 type="submit"
-                className="text-red-600 hover:text-red-900 font-medium text-sm"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                title="Eliminar prédica"
             >
-                Eliminar
+                <Trash2 size={16} />
+                <span className="md:hidden lg:inline">Eliminar</span>
             </button>
         </form>
     )
@@ -32,77 +49,165 @@ export default async function SermonsDashboard() {
 
     if (!userChurch) redirect('/dashboard/settings')
 
-    // Obtenemos las prédicas ordenadas por fecha (más recientes primero)
     const sermons = await prisma.sermon.findMany({
         where: { church_id: userChurch.church_id },
         orderBy: { date: 'desc' }
     })
 
     return (
-        <div className="max-w-6xl">
-            <div className="flex justify-between items-center mb-6">
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 mb-2">Videoteca de Prédicas</h1>
-                    <p className="text-slate-500">Agrega y administra los mensajes y enseñanzas en video.</p>
+                    <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2 flex items-center gap-3">
+                        <MonitorPlay className="text-indigo-600 w-8 h-8" />
+                        Videoteca de <span className="text-indigo-600">Prédicas</span>
+                    </h1>
+                    <p className="text-slate-500 text-lg font-light">Administra y organiza las enseñanzas y mensajes de tu iglesia.</p>
                 </div>
 
                 <Link
                     href="/dashboard/sermons/new"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2"
+                    className="group bg-indigo-600 hover:bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-xl shadow-indigo-200 hover:-translate-y-1 active:scale-95 flex items-center gap-3"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                    Subir Prédica
+                    <Upload size={20} className="transition-transform group-hover:scale-110" />
+                    Subir Nueva Prédica
                 </Link>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            {/* Statistics Bar Placeholder */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <Video size={24} />
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total Mensajes</p>
+                        <p className="text-2xl font-black text-slate-900 leading-none">{sermons.length}</p>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <Sparkles size={24} />
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Más Reciente</p>
+                        <p className="text-xs font-bold text-slate-900 leading-tight">
+                            {sermons[0]?.title || 'Sin mensajes'}
+                        </p>
+                    </div>
+                </div>
+                <div className="bg-slate-900 p-6 rounded-3xl shadow-xl shadow-slate-200 flex items-center gap-4 text-white">
+                    <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white">
+                        <Youtube size={24} />
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-black text-white/50 uppercase tracking-widest leading-none mb-1">Canal Sincronizado</p>
+                        <p className="text-xs font-bold text-white leading-tight">Canal de la Iglesia</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Content Section */}
+            <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                {/* Filters/Search */}
+                <div className="p-8 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/30">
+                    <div className="relative w-full sm:w-96 group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Buscar mensaje por título o predicador..."
+                            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all"
+                        />
+                    </div>
+                </div>
+
                 {sermons.length === 0 ? (
-                    <div className="p-12 text-center text-slate-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-slate-300 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
-                        <p className="text-lg">No has añadido ninguna prédica.</p>
-                        <p className="text-sm">Solo necesitas el enlace de YouTube para empezar.</p>
+                    <div className="p-24 text-center">
+                        <div className="w-24 h-24 bg-slate-50 text-slate-200 rounded-[2rem] flex items-center justify-center mx-auto mb-8">
+                            <Video size={48} strokeWidth={1} />
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-900 mb-4">Aún no has subido prédicas</h3>
+                        <p className="text-slate-500 max-w-sm mx-auto text-lg font-light leading-relaxed mb-8">
+                            Digitaliza tus enseñanzas y permítele a tu comunidad revivirlas en cualquier momento.
+                        </p>
+                        <Link
+                            href="/dashboard/sermons/new"
+                            className="group inline-flex items-center gap-3 bg-indigo-600 hover:bg-slate-900 text-white px-8 py-4 rounded-full font-bold transition-all shadow-xl shadow-indigo-200"
+                        >
+                            <Plus size={18} /> Subir Mi Primera Prédica
+                        </Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-10">
                         {sermons.map((sermon) => (
-                            <div key={sermon.id} className="group relative border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
-                                {/* Thumbnail de YouTube autogenerado mediante su ID */}
-                                <div className="aspect-video bg-slate-100 relative overflow-hidden">
+                            <div key={sermon.id} className="group flex flex-col bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-indigo-500/5 transition-all duration-500 hover:-translate-y-2">
+                                <div className="aspect-video relative overflow-hidden bg-slate-900">
                                     <img
-                                        src={`https://img.youtube.com/vi/${sermon.youtube_video_id}/mqdefault.jpg`}
+                                        src={`https://img.youtube.com/vi/${sermon.youtube_video_id}/maxresdefault.jpg`}
                                         alt={sermon.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${sermon.youtube_video_id}/mqdefault.jpg`;
+                                        }}
                                     />
-                                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
-                                    <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
-                                        {sermon.date.toLocaleDateString()}
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white scale-75 group-hover:scale-100 transition-transform duration-500 border border-white/30">
+                                            <Play size={32} className="fill-current" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center pointer-events-none">
+                                        <div className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest border border-white/10">
+                                            {sermon.date.toLocaleDateString(es.code, { day: 'numeric', month: 'short' })}
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white shadow-lg">
+                                            <Youtube size={14} />
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="p-4">
+                                <div className="p-8 flex flex-col flex-grow">
                                     {sermon.series && (
-                                        <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                                        <div className="inline-flex items-center gap-1 text-[9px] font-black text-indigo-500 uppercase tracking-widest mb-3">
+                                            <Sparkles size={10} />
                                             Serie: {sermon.series}
                                         </div>
                                     )}
-                                    <h3 className="font-bold text-slate-900 line-clamp-2 mt-1 mb-2 leading-tight" title={sermon.title}>
+                                    <h3 className="text-xl font-bold text-slate-900 line-clamp-2 mb-6 group-hover:text-indigo-600 transition-colors leading-tight min-h-[3rem]">
                                         {sermon.title}
                                     </h3>
-                                    <div className="text-sm text-slate-500 font-medium">
-                                        Por: <span className="text-slate-700">{sermon.preacher}</span>
-                                    </div>
 
-                                    <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
-                                        <a
-                                            href={`https://youtube.com/watch?v=${sermon.youtube_video_id}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-slate-400 hover:text-blue-600 transition-colors text-sm font-medium flex items-center gap-1"
-                                        >
-                                            Ver en YouTube
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                                        </a>
-                                        <DeleteButton id={sermon.id} />
+                                    <div className="mt-auto pt-6 border-t border-slate-50 space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">
+                                                <User size={18} />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Predicador</span>
+                                                <span className="text-sm font-bold text-slate-700">{sermon.preacher}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between gap-1 pt-2">
+                                            <a
+                                                href={`https://youtube.com/watch?v=${sermon.youtube_video_id}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-bold text-xs"
+                                            >
+                                                Ver en sitio <ExternalLink size={14} />
+                                            </a>
+                                            <div className="flex items-center gap-1">
+                                                <Link
+                                                    href={`/dashboard/sermons/${sermon.id}/edit`}
+                                                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                                                    title="Editar"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </Link>
+                                                <DeleteButton id={sermon.id} />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

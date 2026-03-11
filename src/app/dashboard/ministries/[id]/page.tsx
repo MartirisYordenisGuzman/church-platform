@@ -6,6 +6,19 @@ import { removeMemberFromMinistry } from './actions'
 import { AddMemberForm } from './components/AddMemberForm'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import {
+    ChevronLeft,
+    Users,
+    Calendar,
+    Layers,
+    Shield,
+    Briefcase,
+    Wallet,
+    Layout,
+    Trash2,
+    Info,
+    Sparkles
+} from 'lucide-react'
 
 function RemoveButton({ ministryMemberId, ministryId }: { ministryMemberId: string, ministryId: string }) {
     return (
@@ -15,10 +28,10 @@ function RemoveButton({ ministryMemberId, ministryId }: { ministryMemberId: stri
         }}>
             <button
                 type="submit"
-                className="text-red-600 hover:text-red-900 font-medium text-sm px-3 py-1 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
-                title="Quitar"
+                className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-300 hover:text-red-600 hover:border-red-100 hover:shadow-lg hover:shadow-red-500/10 transition-all group"
+                title="Quitar del ministerio"
             >
-                Remover
+                <Trash2 size={18} className="group-hover:scale-110 transition-transform" />
             </button>
         </form>
     )
@@ -27,21 +40,44 @@ function RemoveButton({ ministryMemberId, ministryId }: { ministryMemberId: stri
 function RoleBadge({ role }: { role: string }) {
     switch (role) {
         case 'LEADER':
-            return <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full">Líder Principal</span>
+            return (
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 rounded-full border border-amber-100 shadow-sm animate-in fade-in zoom-in-95 duration-500">
+                    <Shield size={12} className="fill-amber-700/10" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Líder Principal</span>
+                </div>
+            )
         case 'COLEADER':
-            return <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">Co-líder / Ayudante</span>
+            return (
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100 shadow-sm">
+                    <Users size={12} className="fill-blue-700/10" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Co-líder</span>
+                </div>
+            )
         case 'SECRETARY':
-            return <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">Secretario(a)</span>
+            return (
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-purple-50 text-purple-700 rounded-full border border-purple-100 shadow-sm">
+                    <Layout size={12} className="fill-purple-700/10" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Secretaría</span>
+                </div>
+            )
         case 'TREASURER':
-            return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Tesorero(a)</span>
+            return (
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100 shadow-sm">
+                    <Wallet size={12} className="fill-emerald-700/10" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Tesorería</span>
+                </div>
+            )
         default:
-            return <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">Miembro Regular</span>
+            return (
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 text-slate-500 rounded-full border border-slate-100 shadow-sm">
+                    <Briefcase size={12} className="fill-slate-500/10" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Integrante</span>
+                </div>
+            )
     }
 }
 
 export default async function MinistryDetailsPage({ params }: { params: { id: string } }) {
-    // Nota: Next 15+ espera que `params` sea objeto asincrono, pero aquí estamos en Next 14/15 con Turbopack configurado estándar.
-    // Usamos await params para la compatibilidad Next 15 si falla
     const resolvedParams = await Promise.resolve(params)
     const ministryId = resolvedParams.id
 
@@ -56,7 +92,6 @@ export default async function MinistryDetailsPage({ params }: { params: { id: st
 
     if (!userChurch) redirect('/dashboard')
 
-    // Obtener detalles del ministerio con sus miembros
     const ministry = await prisma.ministry.findUnique({
         where: {
             id: ministryId,
@@ -79,93 +114,159 @@ export default async function MinistryDetailsPage({ params }: { params: { id: st
         notFound()
     }
 
+    const m = ministry as any
+
     return (
-        <div className="max-w-5xl">
-            <div className="flex items-center gap-4 mb-6">
-                <Link href="/dashboard/ministries" className="text-slate-400 hover:text-slate-800 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
-                </Link>
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-900">{ministry.name}</h1>
-                    <div className="flex items-center gap-2 mt-1">
-                        {ministry.parent && (
-                            <span className="text-sm bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full inline-block">
-                                Dept. de {ministry.parent.name}
-                            </span>
-                        )}
-                        <p className="text-slate-500">Gestión de integrantes y roles</p>
+        <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
+            {/* Header / Navigation */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div className="flex items-center gap-6">
+                    <Link
+                        href="/dashboard/ministries"
+                        className="w-12 h-12 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all group"
+                    >
+                        <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
+                    </Link>
+                    <div>
+                        <div className="flex items-center gap-3 mb-1">
+                            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">{m.name}</h1>
+                            {m.parent && (
+                                <div className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100 flex items-center gap-2">
+                                    <Layers size={14} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Sub-departamento</span>
+                                </div>
+                            )}
+                        </div>
+                        <p className="text-slate-500 text-lg font-light">Gestión interna de colaboradores y funciones.</p>
                     </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/dashboard/ministries"
+                        className="px-6 py-3 bg-white border border-slate-100 rounded-2xl text-slate-400 font-bold hover:text-indigo-600 transition-all flex items-center gap-2 shadow-sm"
+                    >
+                        <Layout size={18} />
+                        <span>Ver Todos</span>
+                    </Link>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Columna Izquierda: Información y Formulario */}
-                <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-4">Acerca de</h3>
-                        <p className="text-slate-700 text-sm mb-4">
-                            {ministry.description || "No hay descripción para este grupo."}
-                        </p>
-                        <div className="space-y-3 pt-4 border-t border-slate-100">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Integrantes:</span>
-                                <span className="font-medium text-slate-900">{ministry.members.length}</span>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                {/* Left Column: Info & Action */}
+                <div className="lg:col-span-4 space-y-8">
+                    {/* About Card */}
+                    <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-8 text-indigo-50/50 group-hover:text-indigo-100/50 transition-colors">
+                            <Info size={120} strokeWidth={4} />
+                        </div>
+
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-sm">
+                                    <Sparkles size={16} />
+                                </div>
+                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ficha Técnica</h3>
                             </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Creado en:</span>
-                                <span className="font-medium text-slate-900">{format(new Date(ministry.created_at), "MMM yyyy", { locale: es })}</span>
+
+                            <p className="text-slate-700 text-sm mb-4">
+                                {m.description || "Este ministerio aún no cuenta con una descripción detallada de su misión."}
+                            </p>
+
+                            <div className="space-y-4 pt-8 border-t border-slate-50">
+                                <div className="flex justify-between items-center bg-slate-50/50 p-4 rounded-2xl border border-slate-50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-indigo-500 shadow-sm">
+                                            <Users size={16} />
+                                        </div>
+                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Fuerza Laboral</span>
+                                    </div>
+                                    <span className="text-xl font-black text-indigo-600">{m.members.length}</span>
+                                </div>
+
+                                <div className="flex justify-between items-center bg-slate-50/50 p-4 rounded-2xl border border-slate-50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-amber-500 shadow-sm">
+                                            <Calendar size={16} />
+                                        </div>
+                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Antigüedad</span>
+                                    </div>
+                                    <span className="text-sm font-black text-slate-700">{format(new Date(m.created_at), "MMM yyyy", { locale: es })}</span>
+                                </div>
+
+                                {m.parent && (
+                                    <div className="flex justify-between items-center bg-indigo-50/40 p-4 rounded-2xl border border-indigo-50">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm">
+                                                <Layers size={16} />
+                                            </div>
+                                            <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Bajo el mando</span>
+                                        </div>
+                                        <span className="text-xs font-black text-indigo-600">{m.parent.name}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    <AddMemberForm ministryId={ministry.id} />
+                    <AddMemberForm ministryId={m.id} />
                 </div>
 
-                {/* Columna Derecha: Lista de Miembros */}
-                <div className="lg:col-span-2">
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div className="px-6 py-5 border-b border-slate-200 bg-slate-50">
-                            <h2 className="font-semibold text-slate-800">Personas en el Grupo ({ministry.members.length})</h2>
+                {/* Right Column: Member List */}
+                <div className="lg:col-span-8 space-y-6">
+                    <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden min-h-[600px] flex flex-col">
+                        <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400">
+                                    <Users size={24} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900 leading-none mb-1">Cuerpo de Colaboradores</h2>
+                                    <p className="text-sm text-slate-400 font-medium">{m.members.length} integrantes activos</p>
+                                </div>
+                            </div>
                         </div>
 
-                        {ministry.members.length === 0 ? (
-                            <div className="p-12 text-center text-slate-500">
-                                <UsersIcon />
-                                <p className="text-lg mb-2">Aún no hay personas asignadas.</p>
-                                <p className="text-sm">Usa el formulario para añadir miembros desde el directorio a este ministerio.</p>
-                            </div>
-                        ) : (
-                            <ul className="divide-y divide-slate-100">
-                                {ministry.members.map((mm) => (
-                                    <li key={mm.id} className="p-4 sm:px-6 hover:bg-slate-50 transition-colors flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="bg-blue-100 text-blue-700 w-10 h-10 rounded-full flex items-center justify-center font-bold">
-                                                {mm.member.first_name.charAt(0)}{mm.member.last_name.charAt(0)}
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-slate-900">
-                                                    {mm.member.first_name} {mm.member.last_name}
-                                                </p>
-                                                <div className="flex items-center gap-2 mt-1 text-sm text-slate-500">
-                                                    <RoleBadge role={mm.role} />
-                                                    {mm.member.phone && <span>• {mm.member.phone}</span>}
+                        <div className="flex-1">
+                            {m.members.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center p-12 text-center text-slate-300">
+                                    <div className="w-24 h-24 rounded-[2rem] bg-slate-50 flex items-center justify-center mb-6">
+                                        <Users size={48} strokeWidth={1} />
+                                    </div>
+                                    <p className="text-xl font-black text-slate-400 mb-2">Grupo sin integrantes</p>
+                                    <p className="text-sm font-medium text-slate-300 max-w-[280px]">Utiliza el panel lateral para asignar personas del directorio a este ministerio.</p>
+                                </div>
+                            ) : (
+                                <ul className="divide-y divide-slate-100">
+                                    {m.members.map((mm: any) => (
+                                        <li key={mm.id} className="p-4 sm:px-10 hover:bg-slate-50 transition-colors flex items-center justify-between group/row">
+                                            <div className="flex items-center gap-6">
+                                                <div className="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-indigo-50 to-slate-100 border border-white flex items-center justify-center font-black text-indigo-600 text-lg shadow-sm">
+                                                    {mm.member.first_name.charAt(0)}{mm.member.last_name.charAt(0)}
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="font-black text-slate-900 text-lg leading-none">
+                                                        {mm.member.first_name} {mm.member.last_name}
+                                                    </p>
+                                                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                                                        <RoleBadge role={mm.role} />
+                                                        {mm.member.phone && <span>• {mm.member.phone}</span>}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <RemoveButton ministryMemberId={mm.id} ministryId={ministry.id} />
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
+                                            <RemoveButton ministryMemberId={mm.id} ministryId={m.id} />
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+
+                        <div className="p-8 bg-slate-50/50 border-t border-slate-50 text-center">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Fin del Listado</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    )
-}
-
-function UsersIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-slate-300 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
     )
 }

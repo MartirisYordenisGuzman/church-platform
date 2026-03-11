@@ -89,3 +89,43 @@ export async function deleteSermon(sermonId: string) {
     revalidatePath('/dashboard/sermons')
     revalidatePath(`/${userChurch.church.slug}/sermons`)
 }
+
+export async function updateSermon(prevState: any, formData: FormData) {
+    const userChurch = await getCurrentUserChurch()
+
+    const id = formData.get('id') as string
+    const title = formData.get('title') as string
+    const preacher = formData.get('preacher') as string
+    const series = formData.get('series') as string
+    const dateStr = formData.get('date') as string
+    const youtubeUrl = formData.get('youtube_url') as string
+
+    if (!id || !title || !preacher || !dateStr || !youtubeUrl) {
+        return { error: 'ID, Título, Predicador, Fecha y Enlace de YouTube son obligatorios.' }
+    }
+
+    const youtubeVideoId = extractYouTubeId(youtubeUrl)
+    if (!youtubeVideoId) {
+        return { error: 'El enlace de YouTube no parece ser válido.' }
+    }
+
+    try {
+        await prisma.sermon.update({
+            where: { id, church_id: userChurch.church_id },
+            data: {
+                title,
+                preacher,
+                series: series || null,
+                date: new Date(dateStr),
+                youtube_video_id: youtubeVideoId,
+            },
+        })
+    } catch (error: any) {
+        console.error('Error actualizando prédica:', error)
+        return { error: 'Ocurrió un error inesperado al actualizar la prédica.' }
+    }
+
+    revalidatePath('/dashboard/sermons')
+    revalidatePath(`/${userChurch.church.slug}/sermons`)
+    redirect('/dashboard/sermons')
+}

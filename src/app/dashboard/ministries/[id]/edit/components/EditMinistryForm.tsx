@@ -1,14 +1,15 @@
 'use client'
 
 import { useActionState, useEffect, useState } from 'react'
-import { createMinistry } from '../actions'
+import { updateMinistry } from '../../../actions'
 import Link from 'next/link'
+import { Ministry } from '@prisma/client'
 import {
     Users,
     Type,
     Layers,
     ChevronLeft,
-    Plus,
+    Save,
     Rocket,
     AlertCircle,
     Sparkles,
@@ -47,8 +48,10 @@ function useMembers() {
 
 const initialState = { error: '' }
 
-export default function NewMinistryPage() {
-    const [state, formAction, isPending] = useActionState(createMinistry, initialState)
+export function EditMinistryForm({ ministry: initialMinistry }: { ministry: any }) {
+    const ministry = initialMinistry
+    const updateMinistryWithId = updateMinistry.bind(null, ministry.id)
+    const [state, formAction, isPending] = useActionState(updateMinistryWithId, initialState)
     const ministries = useMinistries()
     const members = useMembers()
 
@@ -70,8 +73,8 @@ export default function NewMinistryPage() {
                         <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
                     <div>
-                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-1">Nuevo <span className="text-indigo-600">Ministerio</span></h1>
-                        <p className="text-slate-500 text-lg font-light">Estructura un nuevo grupo o departamento de trabajo.</p>
+                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-1">Editar <span className="text-indigo-600">Ministerio</span></h1>
+                        <p className="text-slate-500 text-lg font-light">Actualizando: <span className="font-bold text-slate-700">{ministry.name}</span></p>
                     </div>
                 </div>
             </div>
@@ -80,6 +83,7 @@ export default function NewMinistryPage() {
             <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden">
                 <div className="p-8 md:p-12">
                     <form action={formAction} className="space-y-10">
+                        <input type="hidden" name="id" value={ministry.id} />
 
                         {/* Section: Basic Identity */}
                         <div className="space-y-6">
@@ -99,6 +103,7 @@ export default function NewMinistryPage() {
                                     id="name"
                                     name="name"
                                     type="text"
+                                    defaultValue={ministry.name}
                                     placeholder="Ej: Jóvenes, Ujieres, Alabanza"
                                     className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white transition-all caret-indigo-600"
                                     required
@@ -113,14 +118,14 @@ export default function NewMinistryPage() {
                                 <select
                                     id="parent_id"
                                     name="parent_id"
+                                    defaultValue={ministry.parent_id || ''}
                                     className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white transition-all appearance-none cursor-pointer"
                                 >
                                     <option value="">Ninguno (Es un Ministerio Principal)</option>
                                     {ministries.map(min => (
-                                        <option key={min.id} value={min.id}>{min.name}</option>
+                                        <option key={min.id} value={min.id} disabled={min.id === ministry.id}>{min.name}</option>
                                     ))}
                                 </select>
-                                <p className="px-2 text-[10px] text-slate-400 font-medium">Si seleccionas uno, este grupo será un sub-departamento del ministerio elegido.</p>
                             </div>
                         </div>
 
@@ -143,6 +148,7 @@ export default function NewMinistryPage() {
                                         id="leader_name"
                                         name="leader_name"
                                         type="text"
+                                        defaultValue={ministry.leader_name || ''}
                                         list="members-list"
                                         placeholder="Busca en el directorio..."
                                         className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white transition-all caret-emerald-600"
@@ -159,6 +165,7 @@ export default function NewMinistryPage() {
                                         id="coleader_name"
                                         name="coleader_name"
                                         type="text"
+                                        defaultValue={ministry.coleader_name || ''}
                                         list="members-list"
                                         placeholder="Busca en el directorio..."
                                         className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white transition-all caret-emerald-600"
@@ -185,6 +192,7 @@ export default function NewMinistryPage() {
                                     id="description"
                                     name="description"
                                     rows={4}
+                                    defaultValue={ministry.description || ''}
                                     placeholder="Describe la función principal de este grupo dentro de la iglesia..."
                                     className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-medium placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-amber-500/5 focus:border-amber-500 focus:bg-white transition-all resize-none leading-relaxed caret-amber-600"
                                 ></textarea>
@@ -214,12 +222,12 @@ export default function NewMinistryPage() {
                                 {isPending ? (
                                     <>
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        <span>Creando...</span>
+                                        <span>Actualizando...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <Rocket size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                                        <span>Crear Ministerio</span>
+                                        <Save size={18} className="group-hover:scale-110 transition-transform" />
+                                        <span>Guardar Cambios</span>
                                     </>
                                 )}
                             </button>
