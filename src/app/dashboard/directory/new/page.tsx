@@ -14,8 +14,9 @@ import {
     User,
     Rocket,
     AlertCircle,
-    Sparkles,
-    CheckCircle2
+    CheckCircle2,
+    Calendar,
+    Sparkles
 } from 'lucide-react'
 
 const initialState = { error: '' }
