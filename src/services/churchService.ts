@@ -10,6 +10,15 @@ export const churchService = {
         try {
             const church = await prisma.church.findUnique({
                 where: { slug },
+                include: {
+                    portalConfig: {
+                        include: {
+                            blocks: {
+                                orderBy: { order: "asc" },
+                            },
+                        },
+                    },
+                },
             })
             return church
         } catch (error) {
@@ -34,6 +43,13 @@ export const churchService = {
                     sermons: {
                         orderBy: { date: "desc" },
                         take: 3,
+                    },
+                    portalConfig: {
+                        include: {
+                            blocks: {
+                                orderBy: { order: "asc" },
+                            },
+                        },
                     },
                 },
             })

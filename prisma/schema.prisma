@@ -18,14 +18,15 @@ model Church {
   description String?
   logo        String?
   created_at  DateTime @default(now())
-  
+
   // Relaciones
-  members     UserChurch[] // Usuarios administrativos
-  events      Event[]
-  sermons     Sermon[]
-  ministries  Ministry[]
-  songs       Song[]
-  directory   Member[] // Miembros regulares
+  members      UserChurch[] // Usuarios administrativos
+  events       Event[]
+  sermons      Sermon[]
+  ministries   Ministry[]
+  songs        Song[]
+  directory    Member[] // Miembros regulares
+  portalConfig PortalConfig?
 }
 
 enum EventRecurrence {
@@ -46,11 +47,11 @@ model User {
   id            String   @id @default(uuid()) // Creado localmente o vía NextAuth
   name          String
   email         String   @unique
-  password_hash String   // Para login por credenciales en NextAuth
+  password_hash String // Para login por credenciales en NextAuth
   created_at    DateTime @default(now())
 
   // Un usuario puede pertenecer a múltiples iglesias
-  churches      UserChurch[]
+  churches UserChurch[]
 }
 
 // Tabla pivote con roles (Manejo de Permisos multi-tenant)
@@ -60,8 +61,8 @@ model UserChurch {
   church_id String
   role      Role   @default(MEMBER) // ADMIN, LEADER, MEMBER
 
-  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  church    Church @relation(fields: [church_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  church Church @relation(fields: [church_id], references: [id], onDelete: Cascade)
 
   @@unique([userId, church_id]) // Un usuario solo tiene un registro por iglesia
 }
@@ -75,27 +76,27 @@ enum Role {
 // --- GESTIÓN DE CONTENIDO ---
 
 model Event {
-  id                  String   @id @default(uuid())
-  church_id           String
-  title               String
-  description         String?
-  image_url           String?
-  location            String?
-  start_date          DateTime
-  end_date            DateTime
-  
+  id          String   @id @default(uuid())
+  church_id   String
+  title       String
+  description String?
+  image_url   String?
+  location    String?
+  start_date  DateTime
+  end_date    DateTime
+
   // Recurrencia
   recurrence          EventRecurrence @default(NONE)
   recurrence_end_date DateTime?
-  
-  // Visibilidad y Segmentación
-  visibility          EventVisibility @default(PUBLIC)
-  ministry_id         String?
 
-  created_at          DateTime @default(now())
-  
-  church              Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
-  ministry            Ministry? @relation(fields: [ministry_id], references: [id], onDelete: SetNull)
+  // Visibilidad y Segmentación
+  visibility  EventVisibility @default(PUBLIC)
+  ministry_id String?
+
+  created_at DateTime @default(now())
+
+  church   Church    @relation(fields: [church_id], references: [id], onDelete: Cascade)
+  ministry Ministry? @relation(fields: [ministry_id], references: [id], onDelete: SetNull)
 }
 
 model Sermon {
@@ -107,8 +108,8 @@ model Sermon {
   date             DateTime
   series           String?
   created_at       DateTime @default(now())
-  
-  church           Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+
+  church Church @relation(fields: [church_id], references: [id], onDelete: Cascade)
 }
 
 model Ministry {
@@ -118,33 +119,33 @@ model Ministry {
   description   String?
   leader_name   String?
   coleader_name String?
-  parent_id     String?  // Si tiene un padre, esto es un sub-departamento
+  parent_id     String? // Si tiene un padre, esto es un sub-departamento
   created_at    DateTime @default(now())
-  
-  church        Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+
+  church Church @relation(fields: [church_id], references: [id], onDelete: Cascade)
 
   // Autorelación para departamentos
-  parent        Ministry?  @relation("MinistryHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
-  departments   Ministry[] @relation("MinistryHierarchy")
+  parent      Ministry?  @relation("MinistryHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
+  departments Ministry[] @relation("MinistryHierarchy")
 
   // Eventos exclusivos de este ministerio
-  events        Event[]
+  events Event[]
 
   // Integrantes del ministerio
-  members       MinistryMember[]
+  members MinistryMember[]
 }
 
 model Member {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   church_id  String
   first_name String
   last_name  String
   email      String?
   phone      String?
   birth_date DateTime?
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
 
-  church     Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+  church     Church           @relation(fields: [church_id], references: [id], onDelete: Cascade)
   ministries MinistryMember[]
 }
 
@@ -155,8 +156,8 @@ model MinistryMember {
   role        String   @default("MEMBER") // Puede ser LEADER, COLEADER, MEMBER
   joined_at   DateTime @default(now())
 
-  ministry    Ministry @relation(fields: [ministry_id], references: [id], onDelete: Cascade)
-  member      Member   @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  ministry Ministry @relation(fields: [ministry_id], references: [id], onDelete: Cascade)
+  member   Member   @relation(fields: [member_id], references: [id], onDelete: Cascade)
 
   @@unique([ministry_id, member_id])
 }
@@ -168,6 +169,35 @@ model Song {
   lyrics      String?  @db.Text
   youtube_url String?
   created_at  DateTime @default(now())
-  
-  church      Church   @relation(fields: [church_id], references: [id], onDelete: Cascade)
+
+  church Church @relation(fields: [church_id], references: [id], onDelete: Cascade)
+}
+
+// --- PORTAL CONFIGURATION ---
+
+model PortalConfig {
+  id         String   @id @default(uuid())
+  church_id  String   @unique
+  theme      Json?    @default("{}") // Store colors, fonts, etc.
+  layout     String?  @default("LANDING_PAGE") // LANDING_PAGE or MULTI_PAGE
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  church Church        @relation(fields: [church_id], references: [id], onDelete: Cascade)
+  blocks PortalBlock[]
+}
+
+model PortalBlock {
+  id         String   @id @default(uuid())
+  config_id  String
+  type       String // e.g. 'hero', 'events', 'sermons', 'ministries'
+  order      Int      @default(0)
+  is_visible Boolean  @default(true)
+  data       Json?    @default("{}") // Block-specific configuration (titles, links, style overrides)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  portalConfig PortalConfig @relation(fields: [config_id], references: [id], onDelete: Cascade)
+
+  @@index([config_id, order])
 }

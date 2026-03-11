@@ -19,8 +19,13 @@ export default async function ChurchLayout({
         notFound()
     }
 
+    const primaryColor = (church.portalConfig?.theme as any)?.primaryColor || '#4f46e5'
+
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col">
+        <div
+            className="min-h-screen bg-slate-50 flex flex-col"
+            style={{ '--color-primary': primaryColor } as React.CSSProperties}
+        >
             {/* Navbar Genérico del Portal Público de la Iglesia */}
             <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm transition-all duration-300">
                 <div className="container mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
@@ -35,24 +40,19 @@ export default async function ChurchLayout({
                     </Link>
 
                     <nav className="hidden md:flex items-center gap-8">
-                        <Link
-                            href={`/${churchSlug}/events`}
-                            className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors"
-                        >
-                            Eventos
-                        </Link>
-                        <Link
-                            href={`/${churchSlug}/sermons`}
-                            className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors"
-                        >
-                            Prédicas
-                        </Link>
-                        <Link
-                            href={`/${churchSlug}/ministries`}
-                            className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors"
-                        >
-                            Ministerios
-                        </Link>
+                        {church.portalConfig?.layout === 'LANDING_PAGE' ? (
+                            <>
+                                <a href={`/${churchSlug}#events`} className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Eventos</a>
+                                <a href={`/${churchSlug}#sermons`} className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Prédicas</a>
+                                <a href={`/${churchSlug}#ministries`} className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Ministerios</a>
+                            </>
+                        ) : (
+                            <>
+                                <Link href={`/${churchSlug}/events`} className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Eventos</Link>
+                                <Link href={`/${churchSlug}/sermons`} className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Prédicas</Link>
+                                <Link href={`/${churchSlug}/ministries`} className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Ministerios</Link>
+                            </>
+                        )}
                     </nav>
 
                     {/* Botón de acceso / CTA */}

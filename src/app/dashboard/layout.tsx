@@ -13,7 +13,8 @@ import {
     Bell,
     Search,
     ChevronRight,
-    Sparkles
+    Sparkles,
+    Globe
 } from "lucide-react"
 
 export default async function DashboardLayout({
@@ -39,6 +40,7 @@ export default async function DashboardLayout({
         { href: '/dashboard/directory', label: 'Directorio', icon: Users },
         { href: '/dashboard/songs', label: 'Canciones', icon: Music },
         { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
+        { href: '/dashboard/settings/portal', label: 'Portal Web', icon: Globe },
     ]
 
     return (
